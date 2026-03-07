@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Queue Admin Panel</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Login Screen -->
+        <div id="loginScreen" class="screen active">
+            <div class="login-card">
+                <h1>🏢 Smart Queue Admin</h1>
+                <p class="subtitle">Finance & Registrar Office</p>
+                
+                <div class="form-group">
+                    <label>Department</label>
+                    <select id="departmentSelect">
+                        <option value="">Select Department</option>
+                        <option value="Finance">Finance Office</option>
+                        <option value="Registrar">Registrar Office</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Admin Password</label>
+                    <input type="password" id="adminPassword" placeholder="Enter admin password">
+                </div>
+
+                <button onclick="login()" class="btn btn-primary">Login</button>
+                <p class="error-message" id="loginError"></p>
+            </div>
+        </div>
+
+        <!-- Queue Management Screen -->
+        <div id="queueScreen" class="screen">
+            <div class="header">
+                <div>
+                    <h1 id="departmentTitle">Finance Queue Management</h1>
+                    <p class="date" id="currentDate"></p>
+                </div>
+                <button onclick="logout()" class="btn btn-secondary">Logout</button>
+            </div>
+
+            <div class="queue-container">
+                <!-- Current Serving -->
+                <div class="current-serving">
+                    <h2>Now Serving</h2>
+                    <div class="serving-card">
+                        <div class="queue-number" id="currentQueueNumber">---</div>
+                        <div class="queue-details" id="currentQueueDetails">
+                            <p>No queue currently being served</p>
+                        </div>
+                        <div class="action-buttons">
+                            <button onclick="completeQueue()" class="btn btn-success" id="completeBtn" disabled>
+                                ✓ Complete
+                            </button>
+                            <button onclick="skipQueue()" class="btn btn-warning" id="skipBtn" disabled>
+                                ⏭ Skip
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Next in Queue -->
+                <div class="next-queue">
+                    <h2>Next in Queue</h2>
+                    <div class="next-card">
+                        <div class="queue-number-small" id="nextQueueNumber">---</div>
+                        <div class="queue-details-small" id="nextQueueDetails">
+                            <p>No pending queues</p>
+                        </div>
+                        <button onclick="callNext()" class="btn btn-primary btn-large" id="nextBtn" disabled>
+                            📢 Call Next
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Pending Queues List -->
+                <div class="pending-list">
+                    <h2>Pending Queues (<span id="pendingCount">0</span>)</h2>
+                    <div class="queue-list" id="pendingQueueList">
+                        <p class="empty-message">No pending queues</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Statistics -->
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="stat-number" id="totalToday">0</div>
+                    <div class="stat-label">Total Today</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="completedToday">0</div>
+                    <div class="stat-label">Completed</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="pendingToday">0</div>
+                    <div class="stat-label">Pending</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    
+    <!-- App Script -->
+    <script src="app.js"></script>
+</body>
+</html>

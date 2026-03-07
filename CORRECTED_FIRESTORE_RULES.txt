@@ -1,0 +1,25 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Users collection - users can read/write their own data
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Appointments collection - for queue system
+    match /appointments/{appointmentId} {
+      // Allow authenticated users to create appointments
+      allow create: if request.auth != null;
+      
+      // Allow authenticated users to read all appointments (for dashboard)
+      allow read: if request.auth != null;
+      
+      // Allow users to update only their own appointments
+      allow update: if request.auth != null && resource.data.studentUID == request.auth.uid;
+      
+      // Allow users to delete only their own appointments
+      allow delete: if request.auth != null && resource.data.studentUID == request.auth.uid;
+    }
+  }
+}

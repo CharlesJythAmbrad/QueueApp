@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/white">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp">
+
+        <!-- Progress Indicator -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_marginBottom="24dp">
+
+            <View
+                android:layout_width="40dp"
+                android:layout_height="4dp"
+                android:background="@color/primary_color"/>
+
+            <View
+                android:layout_width="40dp"
+                android:layout_height="4dp"
+                android:background="@color/primary_color"
+                android:layout_marginStart="8dp"/>
+
+            <View
+                android:layout_width="40dp"
+                android:layout_height="4dp"
+                android:background="@android:color/darker_gray"
+                android:layout_marginStart="8dp"/>
+
+            <View
+                android:layout_width="40dp"
+                android:layout_height="4dp"
+                android:background="@android:color/darker_gray"
+                android:layout_marginStart="8dp"/>
+
+        </LinearLayout>
+
+        <!-- Title -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Request Slip"
+            android:textSize="28sp"
+            android:textStyle="bold"
+            android:textColor="#000000"
+            android:gravity="center"
+            android:layout_marginBottom="8dp"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Please select the document details below. This will only take a few minutes."
+            android:textSize="14sp"
+            android:textColor="@android:color/darker_gray"
+            android:gravity="center"
+            android:layout_marginBottom="32dp"/>
+
+        <!-- Document Section -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Document"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="#000000"
+            android:layout_marginBottom="8dp"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Please check the status of name of the document requested"
+            android:textSize="12sp"
+            android:textColor="@android:color/darker_gray"
+            android:layout_marginBottom="16dp"/>
+
+        <!-- Document Options -->
+        <RadioGroup
+            android:id="@+id/radioGroupDocuments"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp">
+
+            <RadioButton
+                android:id="@+id/rbDiploma"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Diploma ( ) Original ( ) CTC only"
+                android:padding="8dp"/>
+
+            <RadioButton
+                android:id="@+id/rbCertificateEligibility"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Certificate of Eligibility"
+                android:padding="8dp"/>
+
+            <RadioButton
+                android:id="@+id/rbCertificateGraduation"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Certificate of Graduation"
+                android:padding="8dp"/>
+
+            <RadioButton
+                android:id="@+id/rbCertificateEnglish"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Certificate of English Subjects taken"
+                android:padding="8dp"/>
+
+            <RadioButton
+                android:id="@+id/rbCorrectionName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Correction of name"
+                android:padding="8dp"/>
+
+            <RadioButton
+                android:id="@+id/rbDentalNumber"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Dental Number (C4D)"
+                android:padding="8dp"/>
+
+            <RadioButton
+                android:id="@+id/rbForm137A"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Form 137-A"
+                android:padding="8dp"/>
+
+            <RadioButton
+                android:id="@+id/rbFormC"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Form C"
+                android:padding="8dp"/>
+
+            <RadioButton
+                android:id="@+id/rbPermitCrossEnrol"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Permit to Cross-Enrol"
+                android:padding="8dp"/>
+
+            <RadioButton
+                android:id="@+id/rbPermitSummer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Permit to Summer"
+                android:padding="8dp"/>
+
+            <RadioButton
+                android:id="@+id/rbSpecialOrder"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Special Order"
+                android:padding="8dp"/>
+
+            <RadioButton
+                android:id="@+id/rbTranscriptRecords"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Transcript of Records"
+                android:padding="8dp"/>
+
+        </RadioGroup>
+
+        <!-- Others Field -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Others (Please Specify)"
+            android:textSize="14sp"
+            android:textColor="#000000"
+            android:layout_marginBottom="4dp"/>
+
+        <EditText
+            android:id="@+id/etOthers"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Ex. Certified True Copy of Grades"
+            android:padding="12dp"
+            android:background="@android:drawable/edit_text"
+            android:layout_marginBottom="32dp"/>
+
+        <!-- Navigation Buttons -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center">
+
+            <Button
+                android:id="@+id/btnBack"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="← Back"
+                android:textSize="16sp"
+                android:layout_marginEnd="16dp"
+                style="@style/Widget.Material3.Button.OutlinedButton"/>
+
+            <Button
+                android:id="@+id/btnNext"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Next  →"
+                android:textSize="16sp"/>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</ScrollView>

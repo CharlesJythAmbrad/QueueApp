@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "974990829264",
+    "project_id": "medicare-1d13f",
+    "storage_bucket": "medicare-1d13f.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:974990829264:android:d0f02de69eed68b378e0d5",
+        "android_client_info": {
+          "package_name": "com.reymoto.medicare"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB6mfosXM1YFoqskF_cEFMu8WiNLQJ7rkg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

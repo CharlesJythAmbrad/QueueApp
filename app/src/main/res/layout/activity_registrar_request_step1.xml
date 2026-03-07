@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/white">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp">
+
+        <!-- Progress Indicator -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_marginBottom="24dp">
+
+            <View
+                android:layout_width="40dp"
+                android:layout_height="4dp"
+                android:background="@color/primary_color"/>
+
+            <View
+                android:layout_width="40dp"
+                android:layout_height="4dp"
+                android:background="@android:color/darker_gray"
+                android:layout_marginStart="8dp"/>
+
+            <View
+                android:layout_width="40dp"
+                android:layout_height="4dp"
+                android:background="@android:color/darker_gray"
+                android:layout_marginStart="8dp"/>
+
+            <View
+                android:layout_width="40dp"
+                android:layout_height="4dp"
+                android:background="@android:color/darker_gray"
+                android:layout_marginStart="8dp"/>
+
+        </LinearLayout>
+
+        <!-- Title -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Request Slip"
+            android:textSize="28sp"
+            android:textStyle="bold"
+            android:textColor="#000000"
+            android:gravity="center"
+            android:layout_marginBottom="8dp"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Please fill in your personal details below. This will only take a few minutes."
+            android:textSize="14sp"
+            android:textColor="@android:color/darker_gray"
+            android:gravity="center"
+            android:layout_marginBottom="32dp"/>
+
+        <!-- Personal Data Section -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Personal data"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="#000000"
+            android:layout_marginBottom="8dp"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Please enter your accurate student information and specify the reason for this request."
+            android:textSize="12sp"
+            android:textColor="@android:color/darker_gray"
+            android:layout_marginBottom="16dp"/>
+
+        <!-- Family Name -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Family Name"
+            android:textSize="14sp"
+            android:textColor="#000000"
+            android:layout_marginBottom="4dp"/>
+
+        <EditText
+            android:id="@+id/etFamilyName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Ambrad"
+            android:padding="12dp"
+            android:background="@android:drawable/edit_text"
+            android:layout_marginBottom="16dp"
+            android:enabled="false"/>
+
+        <!-- First Name -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="First Name"
+            android:textSize="14sp"
+            android:textColor="#000000"
+            android:layout_marginBottom="4dp"/>
+
+        <EditText
+            android:id="@+id/etFirstName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Charles"
+            android:padding="12dp"
+            android:background="@android:drawable/edit_text"
+            android:layout_marginBottom="16dp"
+            android:enabled="false"/>
+
+        <!-- Middle Name -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Middle Name"
+            android:textSize="14sp"
+            android:textColor="#000000"
+            android:layout_marginBottom="4dp"/>
+
+        <EditText
+            android:id="@+id/etMiddleName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Belia"
+            android:padding="12dp"
+            android:background="@android:drawable/edit_text"
+            android:layout_marginBottom="16dp"/>
+
+        <!-- Course & Year -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Course and Year"
+            android:textSize="14sp"
+            android:textColor="#000000"
+            android:layout_marginBottom="4dp"/>
+
+        <EditText
+            android:id="@+id/etCourseYear"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="PT 3rd year"
+            android:padding="12dp"
+            android:background="@android:drawable/edit_text"
+            android:layout_marginBottom="16dp"
+            android:enabled="false"/>
+
+        <!-- Student Number -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Student Number"
+            android:textSize="14sp"
+            android:textColor="#000000"
+            android:layout_marginBottom="4dp"/>
+
+        <EditText
+            android:id="@+id/etStudentNumber"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="05-2324-809068"
+            android:padding="12dp"
+            android:background="@android:drawable/edit_text"
+            android:layout_marginBottom="16dp"
+            android:enabled="false"/>
+
+        <!-- Last Term at SWU -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Last Term at SWU"
+            android:textSize="14sp"
+            android:textColor="#000000"
+            android:layout_marginBottom="4dp"/>
+
+        <Spinner
+            android:id="@+id/spinnerLastTerm"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="12dp"
+            android:background="@android:drawable/edit_text"
+            android:layout_marginBottom="32dp"/>
+
+        <!-- Next Button -->
+        <Button
+            android:id="@+id/btnNext"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Next  →"
+            android:textSize="16sp"
+            android:layout_gravity="center"
+            android:paddingStart="32dp"
+            android:paddingEnd="32dp"/>
+
+    </LinearLayout>
+
+</ScrollView>

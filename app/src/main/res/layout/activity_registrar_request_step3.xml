@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/white">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp">
+
+        <!-- Progress Indicator -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_marginBottom="24dp">
+
+            <View
+                android:layout_width="40dp"
+                android:layout_height="4dp"
+                android:background="@color/primary_color"/>
+
+            <View
+                android:layout_width="40dp"
+                android:layout_height="4dp"
+                android:background="@color/primary_color"
+                android:layout_marginStart="8dp"/>
+
+            <View
+                android:layout_width="40dp"
+                android:layout_height="4dp"
+                android:background="@color/primary_color"
+                android:layout_marginStart="8dp"/>
+
+            <View
+                android:layout_width="40dp"
+                android:layout_height="4dp"
+                android:background="@android:color/darker_gray"
+                android:layout_marginStart="8dp"/>
+
+        </LinearLayout>
+
+        <!-- Title -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Request Slip"
+            android:textSize="28sp"
+            android:textStyle="bold"
+            android:textColor="#000000"
+            android:gravity="center"
+            android:layout_marginBottom="8dp"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Please select the document details below. This will only take a few minutes."
+            android:textSize="14sp"
+            android:textColor="@android:color/darker_gray"
+            android:gravity="center"
+            android:layout_marginBottom="32dp"/>
+
+        <!-- Document Section -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Document"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="#000000"
+            android:layout_marginBottom="8dp"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Please check the purpose of the document requested"
+            android:textSize="12sp"
+            android:textColor="@android:color/darker_gray"
+            android:layout_marginBottom="16dp"/>
+
+        <!-- Purpose Options -->
+        <RadioGroup
+            android:id="@+id/radioGroupPurpose"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp">
+
+            <RadioButton
+                android:id="@+id/rbAuthentication"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Authentication / Certified true copy"
+                android:padding="8dp"/>
+
+            <RadioButton
+                android:id="@+id/rbBarExamination"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Bar Examination"
+                android:padding="8dp"/>
+
+            <RadioButton
+                android:id="@+id/rbBoardExamination"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Board Examination"
+                android:padding="8dp"/>
+
+            <RadioButton
+                android:id="@+id/rbCivilServiceExam"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Civil Service Exam"
+                android:padding="8dp"/>
+
+            <RadioButton
+                android:id="@+id/rbVisaApplication"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Visa Application"
+                android:padding="8dp"/>
+
+            <RadioButton
+                android:id="@+id/rbEmployment"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Employment"
+                android:padding="8dp"/>
+
+            <RadioButton
+                android:id="@+id/rbEmploymentAbroad"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Employment Abroad"
+                android:padding="8dp"/>
+
+            <RadioButton
+                android:id="@+id/rbEvaluation"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Evaluation"
+                android:padding="8dp"/>
+
+            <RadioButton
+                android:id="@+id/rbFurtherStudies"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Further Studies Abroad"
+                android:padding="8dp"/>
+
+            <RadioButton
+                android:id="@+id/rbImmigration"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Immigration Requirement"
+                android:padding="8dp"/>
+
+            <RadioButton
+                android:id="@+id/rbPromotion"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Promotion"
+                android:padding="8dp"/>
+
+            <RadioButton
+                android:id="@+id/rbProperMedicine"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Proper Medicine"
+                android:padding="8dp"/>
+
+            <RadioButton
+                android:id="@+id/rbProperDentistry"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Proper Dentistry"
+                android:padding="8dp"/>
+
+            <RadioButton
+                android:id="@+id/rbRanking"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Ranking"
+                android:padding="8dp"/>
+
+            <RadioButton
+                android:id="@+id/rbReference"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Reference"
+                android:padding="8dp"/>
+
+            <RadioButton
+                android:id="@+id/rbScholarship"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Scholarship"
+                android:padding="8dp"/>
+
+            <RadioButton
+                android:id="@+id/rbStateLicensure"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="State Licensure Board Exam"
+                android:padding="8dp"/>
+
+            <RadioButton
+                android:id="@+id/rbTransfer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Transfer w/ Honorable Dismissal"
+                android:padding="8dp"/>
+
+        </RadioGroup>
+
+        <!-- Others Field -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Others (Please Specify)"
+            android:textSize="14sp"
+            android:textColor="#000000"
+            android:layout_marginBottom="4dp"/>
+
+        <EditText
+            android:id="@+id/etOthersPurpose"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Ex. Certified True Copy of Grades"
+            android:padding="12dp"
+            android:background="@android:drawable/edit_text"
+            android:layout_marginBottom="32dp"/>
+
+        <!-- Navigation Buttons -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center">
+
+            <Button
+                android:id="@+id/btnBack"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="← Back"
+                android:textSize="16sp"
+                android:layout_marginEnd="16dp"
+                style="@style/Widget.Material3.Button.OutlinedButton"/>
+
+            <Button
+                android:id="@+id/btnNext"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Next  →"
+                android:textSize="16sp"/>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</ScrollView>
