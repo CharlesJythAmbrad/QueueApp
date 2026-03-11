@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+    android:background="#F5F5F5">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp">
+
+        <!-- Header -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Payment Slip"
+            android:textSize="28sp"
+            android:textStyle="bold"
+            android:textColor="#333333"
+            android:layout_marginBottom="8dp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Please fill in your personal details below. This will only take a few minutes."
+            android:textSize="14sp"
+            android:textColor="#666666"
+            android:layout_marginBottom="8dp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Step 1 of 2"
+            android:textSize="12sp"
+            android:textColor="#999999"
+            android:layout_marginBottom="24dp"/>
+
+        <!-- Personal Data Section -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Personal Data"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="#333333"
+            android:layout_marginBottom="12dp"/>
+
+        <EditText
+            android:id="@+id/etNameStep2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Name"
+            android:inputType="none"
+            android:focusable="false"
+            android:padding="16dp"
+            android:background="@android:color/white"
+            android:textColor="#999999"
+            android:layout_marginBottom="12dp"/>
+
+        <EditText
+            android:id="@+id/etCourseStep2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Course/Strand"
+            android:inputType="none"
+            android:focusable="false"
+            android:padding="16dp"
+            android:background="@android:color/white"
+            android:textColor="#999999"
+            android:layout_marginBottom="12dp"/>
+
+        <EditText
+            android:id="@+id/etDate"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Date (DD/MM/YYYY)"
+            android:inputType="none"
+            android:focusable="false"
+            android:clickable="true"
+            android:padding="16dp"
+            android:background="@android:color/white"
+            android:layout_marginBottom="12dp"/>
+
+        <EditText
+            android:id="@+id/etStudentIdStep2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Student ID"
+            android:inputType="none"
+            android:focusable="false"
+            android:padding="16dp"
+            android:background="@android:color/white"
+            android:textColor="#999999"
+            android:layout_marginBottom="12dp"/>
+
+        <EditText
+            android:id="@+id/etMobileStep2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Mobile"
+            android:inputType="none"
+            android:focusable="false"
+            android:padding="16dp"
+            android:background="@android:color/white"
+            android:textColor="#999999"
+            android:layout_marginBottom="12dp"/>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="32dp">
+
+            <Spinner
+                android:id="@+id/spinnerPurpose"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:padding="16dp"
+                android:background="@android:drawable/edit_text"
+                android:spinnerMode="dropdown"/>
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:layout_marginEnd="12dp"
+                android:src="@android:drawable/arrow_down_float"
+                android:contentDescription="Dropdown arrow"/>
+
+        </RelativeLayout>
+
+        <!-- Buttons -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:weightSum="2">
+
+            <Button
+                android:id="@+id/btnBack"
+                android:layout_width="0dp"
+                android:layout_height="56dp"
+                android:layout_weight="1"
+                android:text="← Back"
+                android:textSize="16sp"
+                android:layout_marginEnd="8dp"
+                android:background="#E0E0E0"/>
+
+            <Button
+                android:id="@+id/btnNext"
+                android:layout_width="0dp"
+                android:layout_height="56dp"
+                android:layout_weight="1"
+                android:text="Next →"
+                android:textSize="16sp"
+                android:textColor="@android:color/white"
+                android:layout_marginStart="8dp"
+                android:background="#4CAF50"/>
+        </LinearLayout>
+
+    </LinearLayout>
+</ScrollView>

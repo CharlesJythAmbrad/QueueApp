@@ -60,11 +60,18 @@
             android:name=".AppointmentHistoryActivity"
             android:exported="false" />
 
+        <activity
+            android:name=".AdminDashboardActivity"
+            android:exported="false" />
+
         <activity android:name=".RegistrarAppointmentActivity"/>
         <activity 
             android:name=".RegistrarRequestActivity"
             android:exported="false" />
-
+        
+        <activity 
+            android:name=".AdminDashboardActivity"
+            android:exported="false" />
 
     </application>
 

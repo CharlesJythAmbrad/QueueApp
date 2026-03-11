@@ -72,7 +72,7 @@ class DashboardFragment : Fragment() {
             .whereEqualTo("department", "Finance")
             .addSnapshotListener { snapshot, error ->
                 if (error != null) {
-                    textView.text = "---"
+                    textView.text = "0"
                     return@addSnapshotListener
                 }
 
@@ -83,16 +83,13 @@ class DashboardFragment : Fragment() {
                     }
                     
                     if (servingDoc != null) {
-                        textView.text = servingDoc.getString("queueNumber") ?: "---"
+                        val servingNumber = servingDoc.getLong("servingNumber")?.toInt() ?: 0
+                        textView.text = servingNumber.toString()
                     } else {
-                        // Find first pending appointment
-                        val pendingDoc = snapshot.documents.firstOrNull { 
-                            it.getString("status") == "Pending" 
-                        }
-                        textView.text = pendingDoc?.getString("queueNumber") ?: "---"
+                        textView.text = "0"
                     }
                 } else {
-                    textView.text = "---"
+                    textView.text = "0"
                 }
             }
     }
@@ -103,7 +100,7 @@ class DashboardFragment : Fragment() {
             .whereEqualTo("department", "Registrar")
             .addSnapshotListener { snapshot, error ->
                 if (error != null) {
-                    textView.text = "---"
+                    textView.text = "0"
                     return@addSnapshotListener
                 }
 
@@ -114,16 +111,13 @@ class DashboardFragment : Fragment() {
                     }
                     
                     if (servingDoc != null) {
-                        textView.text = servingDoc.getString("queueNumber") ?: "---"
+                        val servingNumber = servingDoc.getLong("servingNumber")?.toInt() ?: 0
+                        textView.text = servingNumber.toString()
                     } else {
-                        // Find first pending appointment
-                        val pendingDoc = snapshot.documents.firstOrNull { 
-                            it.getString("status") == "Pending" 
-                        }
-                        textView.text = pendingDoc?.getString("queueNumber") ?: "---"
+                        textView.text = "0"
                     }
                 } else {
-                    textView.text = "---"
+                    textView.text = "0"
                 }
             }
     }

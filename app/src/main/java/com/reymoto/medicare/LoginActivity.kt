@@ -36,6 +36,15 @@ class LoginActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
+            // Check for admin credentials
+            if (idInput == "00-0000-000000" && passwordInput == "QueueAdmin") {
+                // Admin login - go directly to admin dashboard
+                Toast.makeText(this, "Admin login successful", Toast.LENGTH_SHORT).show()
+                startActivity(Intent(this, AdminDashboardActivity::class.java))
+                finish()
+                return@setOnClickListener
+            }
+
             // Validate ID format (05-2425-000000)
             if (!isValidIdFormat(idInput)) {
                 idNumber.error = "Invalid ID format. Use: 05-2425-000000"
