@@ -16,7 +16,7 @@
             android:layout_height="wrap_content"
             android:text="Queue"
             android:textSize="28sp"
-            android:textStyle="bold"
+            android:textStyle="bold"        
             android:textColor="@color/primary_color"
             android:layout_gravity="center"
             android:layout_marginTop="20dp"
@@ -203,12 +203,10 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:text="No active queue"
-                        android:textSize="20sp"
+                        android:textSize="16sp"
                         android:textStyle="bold"
                         android:textColor="#2E7D32"
-                        android:layout_marginStart="8dp"
-                        android:maxLines="1"
-                        android:ellipsize="end"/>
+                        android:layout_marginStart="8dp"/>
                 </LinearLayout>
 
                 <TextView
@@ -218,9 +216,7 @@
                     android:text=""
                     android:textSize="12sp"
                     android:textColor="@android:color/darker_gray"
-                    android:layout_marginTop="4dp"
-                    android:maxLines="1"
-                    android:ellipsize="end"/>
+                    android:layout_marginTop="4dp"/>
 
             </LinearLayout>
         </androidx.cardview.widget.CardView>
@@ -259,7 +255,7 @@
                     android:id="@+id/btnQueueHistory"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="� Queue History"
+                    android:text="📋 History"
                     android:textSize="16sp"/>
 
             </LinearLayout>

@@ -34,7 +34,7 @@ class MainActivity : AppCompatActivity() {
         bottomNav.setOnItemSelectedListener {
             when (it.itemId) {
                 R.id.nav_home -> loadFragment(DashboardFragment())
-                R.id.nav_book -> loadFragment(BookAppointmentFragment())
+
                 R.id.nav_queue -> loadFragment(QueueFragment())
                 R.id.nav_profile -> loadFragment(ProfileFragment())
             }

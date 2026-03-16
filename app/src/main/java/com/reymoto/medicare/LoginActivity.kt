@@ -52,30 +52,38 @@ class LoginActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            // Convert ID to email format for Firebase Auth
-            val emailFromId = "${idInput.replace("-", "")}@student.edu"
-
-            auth.signInWithEmailAndPassword(emailFromId, passwordInput)
-                .addOnCompleteListener { task ->
-                    if (task.isSuccessful) {
-                        // Fetch user data and show success dialog
-                        val userId = auth.currentUser?.uid
-                        if (userId != null) {
-                            db.collection("users").document(userId)
-                                .get()
-                                .addOnSuccessListener { document ->
-                                    val fullName = document.getString("fullName") ?: "User"
-                                    val course = document.getString("course") ?: ""
-                                    showLoginSuccessDialog(fullName, idInput, course)
-                                }
-                                .addOnFailureListener {
-                                    // If fetching fails, still show success
-                                    showLoginSuccessDialog("User", idInput, "")
-                                }
-                        }
-                    } else {
-                        Toast.makeText(this, "Invalid ID number or password", Toast.LENGTH_LONG).show()
+            // Look up user's Gmail from Firestore using ID number
+            db.collection("users")
+                .whereEqualTo("idNumber", idInput)
+                .get()
+                .addOnSuccessListener { documents ->
+                    if (documents.isEmpty) {
+                        Toast.makeText(this, "ID number not found. Please register first.", Toast.LENGTH_LONG).show()
+                        return@addOnSuccessListener
                     }
+
+                    val userDoc = documents.documents[0]
+                    val userEmail = userDoc.getString("email")
+                    
+                    if (userEmail == null) {
+                        Toast.makeText(this, "User email not found. Please contact support.", Toast.LENGTH_LONG).show()
+                        return@addOnSuccessListener
+                    }
+
+                    // Now authenticate with Firebase using the Gmail
+                    auth.signInWithEmailAndPassword(userEmail, passwordInput)
+                        .addOnCompleteListener { task ->
+                            if (task.isSuccessful) {
+                                val fullName = userDoc.getString("fullName") ?: "User"
+                                val course = userDoc.getString("course") ?: ""
+                                showLoginSuccessDialog(fullName, idInput, course)
+                            } else {
+                                Toast.makeText(this, "Invalid password", Toast.LENGTH_LONG).show()
+                            }
+                        }
+                }
+                .addOnFailureListener { e ->
+                    Toast.makeText(this, "Error looking up user: ${e.message}", Toast.LENGTH_LONG).show()
                 }
         }
 
@@ -131,30 +139,47 @@ class LoginActivity : AppCompatActivity() {
                 }
 
                 // Convert ID to email format
-                val emailFromId = "${idInput.replace("-", "")}@student.edu"
-                
-                sendPasswordResetEmail(emailFromId)
+                sendPasswordResetEmail(idInput)
             }
             .setNegativeButton("Cancel", null)
             .show()
     }
 
-    private fun sendPasswordResetEmail(email: String) {
-        auth.sendPasswordResetEmail(email)
-            .addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    AlertDialog.Builder(this)
-                        .setTitle("Email Sent")
-                        .setMessage("Password reset email has been sent to $email. Please check your email inbox and follow the instructions to reset your password.")
-                        .setPositiveButton("OK", null)
-                        .show()
-                } else {
-                    Toast.makeText(
-                        this,
-                        "Failed to send reset email. Please check if the ID number is registered.",
-                        Toast.LENGTH_LONG
-                    ).show()
+    private fun sendPasswordResetEmail(idNumber: String) {
+        // Look up user's Gmail from Firestore using ID number
+        db.collection("users")
+            .whereEqualTo("idNumber", idNumber)
+            .get()
+            .addOnSuccessListener { documents ->
+                if (documents.isEmpty) {
+                    Toast.makeText(this, "ID number not found. Please check your ID number.", Toast.LENGTH_LONG).show()
+                    return@addOnSuccessListener
                 }
+
+                val userDoc = documents.documents[0]
+                val userEmail = userDoc.getString("email")
+                
+                if (userEmail == null) {
+                    Toast.makeText(this, "User email not found. Please contact support.", Toast.LENGTH_LONG).show()
+                    return@addOnSuccessListener
+                }
+
+                // Send password reset email to the user's Gmail
+                auth.sendPasswordResetEmail(userEmail)
+                    .addOnCompleteListener { task ->
+                        if (task.isSuccessful) {
+                            AlertDialog.Builder(this)
+                                .setTitle("Email Sent")
+                                .setMessage("Password reset email has been sent to $userEmail. Please check your email inbox and follow the instructions to reset your password.")
+                                .setPositiveButton("OK", null)
+                                .show()
+                        } else {
+                            Toast.makeText(this, "Failed to send reset email. Please try again.", Toast.LENGTH_LONG).show()
+                        }
+                    }
+            }
+            .addOnFailureListener { e ->
+                Toast.makeText(this, "Error looking up user: ${e.message}", Toast.LENGTH_LONG).show()
             }
     }
 

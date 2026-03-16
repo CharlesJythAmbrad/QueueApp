@@ -159,6 +159,22 @@
                         android:inputType="phone"/>
                 </com.google.android.material.textfield.TextInputLayout>
 
+                <!-- Gmail -->
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/layoutGmail"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    app:boxStrokeColor="#800000">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etGmail"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Gmail (chbe.ambrad.swu@phinmaed.com)"
+                        android:inputType="textEmailAddress"/>
+                </com.google.android.material.textfield.TextInputLayout>
+
                 <!-- Password -->
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/layoutPassword"

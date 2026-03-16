@@ -131,25 +131,18 @@
                     android:textSize="14sp"
                     android:layout_marginBottom="16dp"/>
 
-                <!-- User ID -->
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="User ID"
-                    android:textSize="12sp"
-                    android:textColor="@android:color/darker_gray"
-                    android:layout_marginBottom="4dp"/>
-
-                <TextView
-                    android:id="@+id/tvUID"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Loading..."
-                    android:textSize="12sp"
-                    android:textColor="@android:color/darker_gray"/>
-
             </LinearLayout>
         </androidx.cardview.widget.CardView>
+
+        <!-- Action Buttons -->
+        <Button
+            android:id="@+id/btnChangePassword"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="🔒 Change Password"
+            android:textSize="16sp"
+            android:layout_marginBottom="12dp"
+            style="@style/Widget.Material3.Button.OutlinedButton"/>
 
         <Button
             android:id="@+id/btnLogout"

@@ -123,16 +123,6 @@
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
-        <!-- Reset Queue Button -->
-        <Button
-            android:id="@+id/btnResetQueue"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="🔄 Reset Daily Queue Numbers"
-            android:backgroundTint="#F44336"
-            android:textColor="#FFFFFF"
-            android:layout_marginBottom="16dp" />
-
         <!-- Pending Queues Count -->
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"

@@ -293,8 +293,6 @@ class BookAppointmentFragment : Fragment() {
                 addEditTextField(layout, "etGcashAmount", "5000")
             }
             "Cash" -> {
-                addFieldLabel(layout, "Gcash Name")
-                addEditTextField(layout, "etGcashName", "Sunshine")
                 addFieldLabel(layout, "Amount")
                 addEditTextField(layout, "etCashAmount", "5000")
             }
@@ -502,22 +500,66 @@ class BookAppointmentFragment : Fragment() {
     }
 
     private fun generateQueueNumber(callback: (String) -> Unit) {
-        val dateFormat = SimpleDateFormat("yyyyMMdd", Locale.getDefault())
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
         val today = dateFormat.format(Date())
         
+        // Count today's queues for Finance department (since this is finance queue form)
         db.collection("appointments")
             .whereEqualTo("department", "Finance")
+            .whereGreaterThanOrEqualTo("timestamp", getStartOfDay())
+            .whereLessThan("timestamp", getEndOfDay())
             .get()
             .addOnSuccessListener { documents ->
-                val count = documents.size() + 1
-                val queueNumber = "$today-FIN-${String.format("%03d", count)}"
+                val todayCount = documents.size() + 1
+                val queueNumber = "$today-FIN-${String.format("%03d", todayCount)}"
                 callback(queueNumber)
             }
             .addOnFailureListener {
-                val random = Random().nextInt(999) + 1
-                val queueNumber = "$today-FIN-${String.format("%03d", random)}"
-                callback(queueNumber)
+                // Fallback: try without date filtering and count manually
+                db.collection("appointments")
+                    .whereEqualTo("department", "Finance")
+                    .get()
+                    .addOnSuccessListener { allDocs ->
+                        // Filter today's appointments manually
+                        val todayDocs = allDocs.documents.filter { doc ->
+                            val timestamp = doc.getTimestamp("timestamp")
+                            if (timestamp != null) {
+                                val docDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(timestamp.toDate())
+                                docDate == today
+                            } else {
+                                false
+                            }
+                        }
+                        
+                        val todayCount = todayDocs.size + 1
+                        val queueNumber = "$today-FIN-${String.format("%03d", todayCount)}"
+                        callback(queueNumber)
+                    }
+                    .addOnFailureListener { e ->
+                        // Final fallback
+                        val random = Random().nextInt(999) + 1
+                        val queueNumber = "$today-FIN-${String.format("%03d", random)}"
+                        callback(queueNumber)
+                    }
             }
+    }
+
+    private fun getStartOfDay(): Date {
+        val calendar = Calendar.getInstance()
+        calendar.set(Calendar.HOUR_OF_DAY, 0)
+        calendar.set(Calendar.MINUTE, 0)
+        calendar.set(Calendar.SECOND, 0)
+        calendar.set(Calendar.MILLISECOND, 0)
+        return calendar.time
+    }
+
+    private fun getEndOfDay(): Date {
+        val calendar = Calendar.getInstance()
+        calendar.set(Calendar.HOUR_OF_DAY, 23)
+        calendar.set(Calendar.MINUTE, 59)
+        calendar.set(Calendar.SECOND, 59)
+        calendar.set(Calendar.MILLISECOND, 999)
+        return calendar.time
     }
 
     override fun onRequestPermissionsResult(

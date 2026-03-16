@@ -23,7 +23,7 @@ class DashboardFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.fragment_dashboard, container, false)
-        
+
         auth = FirebaseAuth.getInstance()
         db = FirebaseFirestore.getInstance()
 
@@ -48,83 +48,77 @@ class DashboardFragment : Fragment() {
         // Button actions
         val requestQueueButton = view.findViewById<Button>(R.id.btnRequestQueue)
         val queueHistoryButton = view.findViewById<Button>(R.id.btnQueueHistory)
-        
+
         requestQueueButton.setOnClickListener {
             parentFragmentManager.beginTransaction()
                 .replace(R.id.fragmentContainer, BookAppointmentFragment())
                 .addToBackStack(null)
                 .commit()
         }
-        
+
         queueHistoryButton.setOnClickListener {
             parentFragmentManager.beginTransaction()
                 .replace(R.id.fragmentContainer, QueueFragment())
                 .addToBackStack(null)
                 .commit()
         }
-        
+
         return view
     }
 
     private fun loadFinanceQueue(textView: TextView) {
-        // Get all Finance appointments and filter in code to avoid index requirement
-        db.collection("appointments")
-            .whereEqualTo("department", "Finance")
-            .addSnapshotListener { snapshot, error ->
+        // Listen to the serving counters document in Firestore for real-time sync
+        db.collection("system").document("servingCounters")
+            .addSnapshotListener { document, error ->
                 if (error != null) {
-                    textView.text = "0"
+                    // Fallback to admin prefs if Firestore fails
+                    loadFromAdminPrefs(textView, "Finance")
                     return@addSnapshotListener
                 }
 
-                if (snapshot != null && !snapshot.isEmpty) {
-                    // Find serving appointment first
-                    val servingDoc = snapshot.documents.firstOrNull { 
-                        it.getString("status") == "Serving" 
-                    }
-                    
-                    if (servingDoc != null) {
-                        val servingNumber = servingDoc.getLong("servingNumber")?.toInt() ?: 0
-                        textView.text = servingNumber.toString()
-                    } else {
-                        textView.text = "0"
-                    }
+                if (document != null && document.exists()) {
+                    val financeCounter = document.getLong("financeCounter")?.toInt() ?: 0
+                    textView.text = financeCounter.toString()
                 } else {
-                    textView.text = "0"
+                    // Document doesn't exist yet, fallback to admin prefs
+                    loadFromAdminPrefs(textView, "Finance")
                 }
             }
     }
 
     private fun loadRegistrarQueue(textView: TextView) {
-        // Get all Registrar appointments and filter in code to avoid index requirement
-        db.collection("appointments")
-            .whereEqualTo("department", "Registrar")
-            .addSnapshotListener { snapshot, error ->
+        // Listen to the serving counters document in Firestore for real-time sync
+        db.collection("system").document("servingCounters")
+            .addSnapshotListener { document, error ->
                 if (error != null) {
-                    textView.text = "0"
+                    // Fallback to admin prefs if Firestore fails
+                    loadFromAdminPrefs(textView, "Registrar")
                     return@addSnapshotListener
                 }
 
-                if (snapshot != null && !snapshot.isEmpty) {
-                    // Find serving appointment first
-                    val servingDoc = snapshot.documents.firstOrNull { 
-                        it.getString("status") == "Serving" 
-                    }
-                    
-                    if (servingDoc != null) {
-                        val servingNumber = servingDoc.getLong("servingNumber")?.toInt() ?: 0
-                        textView.text = servingNumber.toString()
-                    } else {
-                        textView.text = "0"
-                    }
+                if (document != null && document.exists()) {
+                    val registrarCounter = document.getLong("registrarCounter")?.toInt() ?: 0
+                    textView.text = registrarCounter.toString()
                 } else {
-                    textView.text = "0"
+                    // Document doesn't exist yet, fallback to admin prefs
+                    loadFromAdminPrefs(textView, "Registrar")
                 }
             }
     }
 
+    private fun loadFromAdminPrefs(textView: TextView, department: String) {
+        val prefs = requireContext().getSharedPreferences("AdminQueuePrefs", android.content.Context.MODE_PRIVATE)
+        val counter = when (department) {
+            "Finance" -> prefs.getInt("financeCounter", 0)
+            "Registrar" -> prefs.getInt("registrarCounter", 0)
+            else -> 0
+        }
+        textView.text = counter.toString()
+    }
+
     private fun loadMyQueue(queueTextView: TextView, statusTextView: TextView) {
         val currentUser = auth.currentUser
-        
+
         if (currentUser == null) {
             queueTextView.text = "Not logged in"
             statusTextView.text = ""
@@ -144,19 +138,32 @@ class DashboardFragment : Fragment() {
                 if (snapshot != null && !snapshot.isEmpty) {
                     // Find most recent pending or serving appointment
                     val activeDoc = snapshot.documents
-                        .filter { 
+                        .filter {
                             val status = it.getString("status")
                             status == "Pending" || status == "Serving"
                         }
                         .maxByOrNull { it.getTimestamp("timestamp")?.toDate()?.time ?: 0 }
-                    
+
                     if (activeDoc != null) {
                         val queueNumber = activeDoc.getString("queueNumber")
                         val status = activeDoc.getString("status")
                         val department = activeDoc.getString("department")
-                        
-                        queueTextView.text = queueNumber ?: "---"
-                        
+
+                        // Extract only the department prefix and number from full queue number
+                        // Format: "2026-03-14-FIN-001" -> "FIN-001"
+                        val displayQueueNumber = if (queueNumber != null) {
+                            val parts = queueNumber.split("-")
+                            if (parts.size >= 5) {
+                                "${parts[3]}-${parts[4]}" // FIN-001 or REG-001
+                            } else {
+                                queueNumber // fallback to full number if format is unexpected
+                            }
+                        } else {
+                            "---"
+                        }
+
+                        queueTextView.text = displayQueueNumber
+
                         val statusText = when (status) {
                             "Serving" -> "🟢 Now being served at $department"
                             "Pending" -> "⏳ Waiting in $department queue"

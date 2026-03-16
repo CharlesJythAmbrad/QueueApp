@@ -17,7 +17,7 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:layout_gravity="center_horizontal"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="12dp"
             android:layout_marginBottom="32dp">
 
             <View
@@ -189,8 +189,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:weightSum="2"
-            android:layout_marginBottom="24dp">
+            android:layout_marginBottom="100dp"
+            android:weightSum="2">
 
             <Button
                 android:id="@+id/btnBack"
@@ -205,16 +205,15 @@
 
             <Button
                 android:id="@+id/btnSubmit"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="48dp"
+                android:layout_weight="1"
                 android:text="Submit"
                 android:textSize="15sp"
                 android:textColor="#616161"
-                android:paddingStart="32dp"
-                android:paddingEnd="32dp"
-                android:background="@android:drawable/dialog_holo_light_frame"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginStart="8dp"/>
+                android:layout_marginStart="8dp"
+                android:background="@android:drawable/dialog_holo_light_frame"/>
+
         </LinearLayout>
 
     </LinearLayout>

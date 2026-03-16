@@ -8,10 +8,12 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
+import java.text.SimpleDateFormat
+import java.util.*
 
 class AdminDashboardFragment : Fragment() {
 
@@ -30,6 +32,7 @@ class AdminDashboardFragment : Fragment() {
     private val PREFS_NAME = "AdminQueuePrefs"
     private val FINANCE_COUNTER_KEY = "financeCounter"
     private val REGISTRAR_COUNTER_KEY = "registrarCounter"
+    private val LAST_RESET_DATE_KEY = "lastResetDate"
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -40,8 +43,14 @@ class AdminDashboardFragment : Fragment() {
         
         db = FirebaseFirestore.getInstance()
         
+        // Check if daily reset is needed
+        checkAndPerformDailyReset()
+        
         // Load saved counters
         loadCounters()
+        
+        // Initialize Firestore serving counters document with current values
+        initializeFirestoreCounters()
         
         // Initialize views
         tvFinanceServing = view.findViewById(R.id.tvFinanceServing)
@@ -55,12 +64,10 @@ class AdminDashboardFragment : Fragment() {
         
         val btnFinanceNext = view.findViewById<Button>(R.id.btnFinanceNext)
         val btnRegistrarNext = view.findViewById<Button>(R.id.btnRegistrarNext)
-        val btnResetQueue = view.findViewById<Button>(R.id.btnResetQueue)
         
         // Button listeners
         btnFinanceNext.setOnClickListener { callNextQueue("Finance") }
         btnRegistrarNext.setOnClickListener { callNextQueue("Registrar") }
-        btnResetQueue.setOnClickListener { showResetConfirmation() }
         
         // Setup real-time listeners for pending count
         setupRealtimeListeners()
@@ -68,10 +75,115 @@ class AdminDashboardFragment : Fragment() {
         return view
     }
 
+    private fun checkAndPerformDailyReset() {
+        val prefs = requireContext().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+        val today = dateFormat.format(Date())
+        val lastResetDate = prefs.getString(LAST_RESET_DATE_KEY, "")
+        
+        if (lastResetDate != today) {
+            // It's a new day, reset counters
+            resetCountersAutomatically()
+            
+            // Save today's date as the last reset date
+            prefs.edit().putString(LAST_RESET_DATE_KEY, today).apply()
+        }
+    }
+
+    private fun resetCountersAutomatically() {
+        val prefs = requireContext().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        prefs.edit().apply {
+            putInt(FINANCE_COUNTER_KEY, 0)
+            putInt(REGISTRAR_COUNTER_KEY, 0)
+            apply()
+        }
+        
+        financeCounter = 0
+        registrarCounter = 0
+        
+        // Also reset the Firestore serving counters document
+        val servingData = hashMapOf(
+            "financeCounter" to 0,
+            "registrarCounter" to 0,
+            "lastUpdated" to FieldValue.serverTimestamp()
+        )
+        
+        db.collection("system").document("servingCounters")
+            .set(servingData)
+            .addOnFailureListener { e ->
+                android.util.Log.e("AdminDashboard", "Error resetting serving counters: ${e.message}")
+            }
+    }
+
     private fun loadCounters() {
         val prefs = requireContext().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         financeCounter = prefs.getInt(FINANCE_COUNTER_KEY, 0)
         registrarCounter = prefs.getInt(REGISTRAR_COUNTER_KEY, 0)
+    }
+
+    private fun initializeFirestoreCounters() {
+        // Check if Firestore document exists and is from today
+        db.collection("system").document("servingCounters")
+            .get()
+            .addOnSuccessListener { document ->
+                val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                val today = dateFormat.format(Date())
+                
+                if (document.exists()) {
+                    val lastUpdated = document.getTimestamp("lastUpdated")
+                    val docDate = if (lastUpdated != null) {
+                        dateFormat.format(lastUpdated.toDate())
+                    } else {
+                        ""
+                    }
+                    
+                    // Only update if document is from a different day or counters don't match
+                    if (docDate != today) {
+                        // Document is from previous day, update with current (reset) values
+                        updateFirestoreCounters()
+                    } else {
+                        // Document is from today, sync local counters with Firestore
+                        val firestoreFinanceCounter = document.getLong("financeCounter")?.toInt() ?: 0
+                        val firestoreRegistrarCounter = document.getLong("registrarCounter")?.toInt() ?: 0
+                        
+                        // Use the higher value between local and Firestore (in case of multiple admin sessions)
+                        financeCounter = maxOf(financeCounter, firestoreFinanceCounter)
+                        registrarCounter = maxOf(registrarCounter, firestoreRegistrarCounter)
+                        
+                        // Update UI and save to SharedPreferences
+                        tvFinanceServing.text = financeCounter.toString()
+                        tvRegistrarServing.text = registrarCounter.toString()
+                        saveCounters()
+                        
+                        // Update Firestore if local values are higher
+                        if (financeCounter > firestoreFinanceCounter || registrarCounter > firestoreRegistrarCounter) {
+                            updateFirestoreCounters()
+                        }
+                    }
+                } else {
+                    // Document doesn't exist, create it
+                    updateFirestoreCounters()
+                }
+            }
+            .addOnFailureListener { e ->
+                android.util.Log.e("AdminDashboard", "Error checking serving counters: ${e.message}")
+                // Fallback: create/update document
+                updateFirestoreCounters()
+            }
+    }
+
+    private fun updateFirestoreCounters() {
+        val servingData = hashMapOf(
+            "financeCounter" to financeCounter,
+            "registrarCounter" to registrarCounter,
+            "lastUpdated" to FieldValue.serverTimestamp()
+        )
+        
+        db.collection("system").document("servingCounters")
+            .set(servingData)
+            .addOnFailureListener { e ->
+                android.util.Log.e("AdminDashboard", "Error updating serving counters: ${e.message}")
+            }
     }
 
     private fun saveCounters() {
@@ -129,6 +241,9 @@ class AdminDashboardFragment : Fragment() {
                 
                 saveCounters()
                 
+                // Update Firestore serving counter document for real-time sync
+                updateFirestoreCounters()
+                
                 // Update status to Serving and store the serving number
                 val updates = hashMapOf<String, Any>(
                     "status" to "Serving",
@@ -172,6 +287,9 @@ class AdminDashboardFragment : Fragment() {
                         
                         saveCounters()
                         
+                        // Update Firestore serving counter document for real-time sync
+                        updateFirestoreCounters()
+                        
                         // Update status to Serving and store the serving number
                         val updates = hashMapOf<String, Any>(
                             "status" to "Serving",
@@ -190,29 +308,6 @@ class AdminDashboardFragment : Fragment() {
                         Toast.makeText(context, "Error: ${e2.message}", Toast.LENGTH_LONG).show()
                     }
             }
-    }
-
-    private fun showResetConfirmation() {
-        AlertDialog.Builder(requireContext())
-            .setTitle("⚠️ Reset Queue Counters")
-            .setMessage("This will reset both Finance and Registrar counters back to 0.\n\nAre you sure?")
-            .setPositiveButton("Reset") { _, _ ->
-                resetCounters()
-            }
-            .setNegativeButton("Cancel", null)
-            .show()
-    }
-
-    private fun resetCounters() {
-        financeCounter = 0
-        registrarCounter = 0
-        
-        tvFinanceServing.text = "0"
-        tvRegistrarServing.text = "0"
-        
-        saveCounters()
-        
-        Toast.makeText(context, "Counters reset to 0", Toast.LENGTH_SHORT).show()
     }
 
     override fun onDestroyView() {

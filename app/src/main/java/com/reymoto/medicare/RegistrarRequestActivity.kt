@@ -54,7 +54,7 @@ class RegistrarRequestActivity : AppCompatActivity() {
         
         val etFamilyName = findViewById<EditText>(R.id.etFamilyName)
         val etFirstName = findViewById<EditText>(R.id.etFirstName)
-        val etMiddleName = findViewById<EditText>(R.id.etMiddleName)
+
         val etCourseYear = findViewById<EditText>(R.id.etCourseYear)
         val etStudentNumber = findViewById<EditText>(R.id.etStudentNumber)
         val spinnerLastTerm = findViewById<Spinner>(R.id.spinnerLastTerm)
@@ -97,7 +97,7 @@ class RegistrarRequestActivity : AppCompatActivity() {
         spinnerLastTerm.adapter = adapter
         
         btnNext.setOnClickListener {
-            middleName = etMiddleName.text.toString().trim()
+
             lastTerm = spinnerLastTerm.selectedItem.toString()
             
             if (middleName.isEmpty()) {
@@ -192,19 +192,28 @@ class RegistrarRequestActivity : AppCompatActivity() {
         // Pre-fill contact number
         etContactNumber.setText(contactNumber)
         
-        // Setup Date spinner (next 7 days)
+        // Setup Date spinner with current date automatically selected
         val dates = mutableListOf<String>()
-        dates.add("Select Date")
         val dateFormat = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault())
         val calendar = Calendar.getInstance()
-        for (i in 0..6) {
-            dates.add(dateFormat.format(calendar.time))
+        
+        // Add current date as the first and selected option
+        val todayDate = dateFormat.format(calendar.time)
+        dates.add(todayDate)
+        
+        // Add next 6 days as additional options
+        for (i in 1..6) {
             calendar.add(Calendar.DAY_OF_MONTH, 1)
+            dates.add(dateFormat.format(calendar.time))
         }
         
         val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, dates)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinnerDate.adapter = adapter
+        
+        // Automatically select today's date (first item)
+        spinnerDate.setSelection(0)
+        selectedDate = todayDate
         
         btnBack.setOnClickListener {
             loadStep3()
@@ -213,11 +222,6 @@ class RegistrarRequestActivity : AppCompatActivity() {
         btnSubmit.setOnClickListener {
             selectedDate = spinnerDate.selectedItem.toString()
             contactNumber = etContactNumber.text.toString().trim()
-            
-            if (selectedDate == "Select Date") {
-                Toast.makeText(this, "Please select a date", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
             
             if (contactNumber.isEmpty() || contactNumber.length < 11) {
                 Toast.makeText(this, "Please enter a valid contact number", Toast.LENGTH_SHORT).show()
@@ -231,58 +235,112 @@ class RegistrarRequestActivity : AppCompatActivity() {
     private fun submitRequest() {
         val currentUser = auth.currentUser ?: return
         
-        // Generate queue number
-        val dateFormat = SimpleDateFormat("yyyyMMdd", Locale.getDefault())
+        // Generate queue number based on today's count
+        generateDailyQueueNumber { queueNumber ->
+            val requestData = hashMapOf(
+                "studentUID" to currentUser.uid,
+                "studentEmail" to currentUser.email,
+                "department" to "Registrar",
+                "transactionType" to "Document Request",
+                "queueNumber" to queueNumber,
+                "status" to "Pending",
+                "timestamp" to Timestamp.now(),
+                "appointmentDate" to SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date()),
+                "appointmentTime" to SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date()),
+                
+                // Personal Data
+                "familyName" to familyName,
+                "firstName" to firstName,
+                "middleName" to middleName,
+                "courseYear" to courseYear,
+                "studentNumber" to studentNumber,
+                "lastTerm" to lastTerm,
+                
+                // Document
+                "documentType" to selectedDocument,
+                "otherDocument" to otherDocument,
+                
+                // Purpose
+                "purpose" to selectedPurpose,
+                "otherPurpose" to otherPurpose,
+                
+                // Contact
+                "requestDate" to selectedDate,
+                "contactNumber" to contactNumber
+            )
+            
+            db.collection("appointments")
+                .add(requestData)
+                .addOnSuccessListener {
+                    showSuccessDialog(queueNumber)
+                }
+                .addOnFailureListener { e ->
+                    Toast.makeText(this, "Error: ${e.message}", Toast.LENGTH_LONG).show()
+                }
+        }
+    }
+
+    private fun generateDailyQueueNumber(callback: (String) -> Unit) {
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
         val today = dateFormat.format(Date())
         
+        // Count today's Registrar queues
         db.collection("appointments")
-            .whereEqualTo("appointmentDate", SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date()))
             .whereEqualTo("department", "Registrar")
+            .whereGreaterThanOrEqualTo("timestamp", getStartOfDay())
+            .whereLessThan("timestamp", getEndOfDay())
             .get()
             .addOnSuccessListener { documents ->
-                val queueNumber = "$today-REG-${String.format("%03d", documents.size() + 1)}"
-                
-                val requestData = hashMapOf(
-                    "studentUID" to currentUser.uid,
-                    "studentEmail" to currentUser.email,
-                    "department" to "Registrar",
-                    "transactionType" to "Document Request",
-                    "queueNumber" to queueNumber,
-                    "status" to "Pending",
-                    "timestamp" to Timestamp.now(),
-                    "appointmentDate" to SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date()),
-                    "appointmentTime" to SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date()),
-                    
-                    // Personal Data
-                    "familyName" to familyName,
-                    "firstName" to firstName,
-                    "middleName" to middleName,
-                    "courseYear" to courseYear,
-                    "studentNumber" to studentNumber,
-                    "lastTerm" to lastTerm,
-                    
-                    // Document
-                    "documentType" to selectedDocument,
-                    "otherDocument" to otherDocument,
-                    
-                    // Purpose
-                    "purpose" to selectedPurpose,
-                    "otherPurpose" to otherPurpose,
-                    
-                    // Contact
-                    "requestDate" to selectedDate,
-                    "contactNumber" to contactNumber
-                )
-                
+                val todayCount = documents.size() + 1
+                val queueNumber = "$today-REG-${String.format("%03d", todayCount)}"
+                callback(queueNumber)
+            }
+            .addOnFailureListener {
+                // Fallback: try without date filtering and count manually
                 db.collection("appointments")
-                    .add(requestData)
-                    .addOnSuccessListener {
-                        showSuccessDialog(queueNumber)
+                    .whereEqualTo("department", "Registrar")
+                    .get()
+                    .addOnSuccessListener { allDocs ->
+                        // Filter today's appointments manually
+                        val todayDocs = allDocs.documents.filter { doc ->
+                            val timestamp = doc.getTimestamp("timestamp")
+                            if (timestamp != null) {
+                                val docDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(timestamp.toDate())
+                                docDate == today
+                            } else {
+                                false
+                            }
+                        }
+                        
+                        val todayCount = todayDocs.size + 1
+                        val queueNumber = "$today-REG-${String.format("%03d", todayCount)}"
+                        callback(queueNumber)
                     }
                     .addOnFailureListener { e ->
-                        Toast.makeText(this, "Error: ${e.message}", Toast.LENGTH_LONG).show()
+                        // Final fallback
+                        val random = Random().nextInt(999) + 1
+                        val queueNumber = "$today-REG-${String.format("%03d", random)}"
+                        callback(queueNumber)
                     }
             }
+    }
+
+    private fun getStartOfDay(): Date {
+        val calendar = Calendar.getInstance()
+        calendar.set(Calendar.HOUR_OF_DAY, 0)
+        calendar.set(Calendar.MINUTE, 0)
+        calendar.set(Calendar.SECOND, 0)
+        calendar.set(Calendar.MILLISECOND, 0)
+        return calendar.time
+    }
+
+    private fun getEndOfDay(): Date {
+        val calendar = Calendar.getInstance()
+        calendar.set(Calendar.HOUR_OF_DAY, 23)
+        calendar.set(Calendar.MINUTE, 59)
+        calendar.set(Calendar.SECOND, 59)
+        calendar.set(Calendar.MILLISECOND, 999)
+        return calendar.time
     }
 
     private fun showSuccessDialog(queueNumber: String) {

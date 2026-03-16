@@ -29,6 +29,7 @@ class RegisterActivity : AppCompatActivity() {
         val courseDropdown = findViewById<AutoCompleteTextView>(R.id.etCourse)
         val yearLevelDropdown = findViewById<AutoCompleteTextView>(R.id.etYearLevel)
         val contact = findViewById<TextInputEditText>(R.id.etContact)
+        val gmail = findViewById<TextInputEditText>(R.id.etGmail)
         val password = findViewById<TextInputEditText>(R.id.etPassword)
         val confirmPassword = findViewById<TextInputEditText>(R.id.etConfirmPassword)
         val rulesCheckBox = findViewById<CheckBox>(R.id.cbRules)
@@ -96,12 +97,14 @@ class RegisterActivity : AppCompatActivity() {
             val courseText = courseDropdown.text.toString().trim()
             val yearLevelText = yearLevelDropdown.text.toString().trim()
             val contactText = contact.text.toString().trim()
+            val gmailText = gmail.text.toString().trim()
             val passText = password.text.toString()
             val confirmText = confirmPassword.text.toString()
 
             // Validation
             if (firstNameText.isEmpty() || lastNameText.isEmpty() || idText.isEmpty() || 
-                courseText.isEmpty() || yearLevelText.isEmpty() || contactText.isEmpty() || passText.isEmpty() || confirmText.isEmpty()
+                courseText.isEmpty() || yearLevelText.isEmpty() || contactText.isEmpty() || 
+                gmailText.isEmpty() || passText.isEmpty() || confirmText.isEmpty()
             ) {
                 Toast.makeText(this, "Please fill in all fields", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
@@ -119,6 +122,13 @@ class RegisterActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
+            // Validate Gmail format
+            if (!android.util.Patterns.EMAIL_ADDRESS.matcher(gmailText).matches()) {
+                gmail.error = "Invalid email format"
+                Toast.makeText(this, "Please enter a valid Gmail address", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
             // Validate password with regex
             if (!isValidPassword(passText)) {
                 password.error = "Invalid password format"
@@ -131,12 +141,11 @@ class RegisterActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            // Convert ID to email format for Firebase Auth
-            val emailFromId = "${idText.replace("-", "")}@student.edu"
+            // Use Gmail for Firebase Auth instead of generated email
             val fullName = "$firstNameText $lastNameText"
 
-            // Firebase registration
-            auth.createUserWithEmailAndPassword(emailFromId, passText)
+            // Firebase registration using Gmail
+            auth.createUserWithEmailAndPassword(gmailText, passText)
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
                         val userId = auth.currentUser?.uid
@@ -147,7 +156,7 @@ class RegisterActivity : AppCompatActivity() {
                             "idNumber" to idText,
                             "course" to courseText,
                             "yearLevel" to yearLevelText,
-                            "email" to emailFromId,
+                            "email" to gmailText,
                             "contact" to contactText
                         )
                         userId?.let { 

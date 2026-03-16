@@ -9,7 +9,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="My Queue History"
+        android:text="History"
         android:textSize="26sp"
         android:textStyle="bold"
         android:textColor="@color/primary_color"
@@ -38,7 +38,7 @@
         android:id="@+id/tvEmptyView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="No queue requests yet"
+        android:text="No queue history yet\nMake your first request to see it here"
         android:textSize="16sp"
         android:textAlignment="center"
         android:textColor="@android:color/darker_gray"
