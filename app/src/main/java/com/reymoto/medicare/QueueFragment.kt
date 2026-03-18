@@ -35,6 +35,12 @@ class QueueFragment : Fragment() {
         auth = FirebaseAuth.getInstance()
         db = FirebaseFirestore.getInstance()
 
+        // Notification icon click
+        val notificationIcon = view.findViewById<android.widget.ImageView>(R.id.ivNotification)
+        notificationIcon.setOnClickListener {
+            showNotificationsDialog()
+        }
+
         initViews(view)
         setupRecyclerView()
         loadMyQueueHistory()
@@ -138,5 +144,13 @@ class QueueFragment : Fragment() {
     private fun showEmptyView(show: Boolean) {
         emptyView.visibility = if (show) View.VISIBLE else View.GONE
         recyclerView.visibility = if (show) View.GONE else View.VISIBLE
+    }
+
+    private fun showNotificationsDialog() {
+        androidx.appcompat.app.AlertDialog.Builder(requireContext())
+            .setTitle("🔔 Notifications")
+            .setMessage("Queue History Updates:\n\n• Queue status changes\n• Completion notifications\n• Cancellation confirmations\n• Service reminders\n\nTrack your queue activities here!")
+            .setPositiveButton("OK", null)
+            .show()
     }
 }

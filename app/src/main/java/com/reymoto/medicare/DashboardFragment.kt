@@ -27,6 +27,12 @@ class DashboardFragment : Fragment() {
         auth = FirebaseAuth.getInstance()
         db = FirebaseFirestore.getInstance()
 
+        // Notification icon click
+        val notificationIcon = view.findViewById<android.widget.ImageView>(R.id.ivNotification)
+        notificationIcon.setOnClickListener {
+            showNotificationsDialog()
+        }
+
         val financeQueueText = view.findViewById<TextView>(R.id.tvFinanceQueue)
         val registrarQueueText = view.findViewById<TextView>(R.id.tvRegistrarQueue)
         val financeDateText = view.findViewById<TextView>(R.id.tvFinanceDate)
@@ -179,5 +185,13 @@ class DashboardFragment : Fragment() {
                     statusTextView.text = "Request a queue to get started"
                 }
             }
+    }
+
+    private fun showNotificationsDialog() {
+        androidx.appcompat.app.AlertDialog.Builder(requireContext())
+            .setTitle("🔔 Notifications")
+            .setMessage("Queue Status Updates:\n\n• Your queue requests will appear here\n• Real-time serving number updates\n• Important announcements\n\nStay tuned for updates!")
+            .setPositiveButton("OK", null)
+            .show()
     }
 }

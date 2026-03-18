@@ -20,6 +20,9 @@ class LoginActivity : AppCompatActivity() {
         auth = FirebaseAuth.getInstance()
         db = FirebaseFirestore.getInstance()
 
+        // Check for saved admin session
+        checkAdminSession()
+
         val idNumber = findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.etIdNumber)
         val password = findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.etPassword)
         val login = findViewById<Button>(R.id.btnLogin)
@@ -38,6 +41,9 @@ class LoginActivity : AppCompatActivity() {
 
             // Check for admin credentials
             if (idInput == "00-0000-000000" && passwordInput == "QueueAdmin") {
+                // Save admin session
+                saveAdminSession()
+                
                 // Admin login - go directly to admin dashboard
                 Toast.makeText(this, "Admin login successful", Toast.LENGTH_SHORT).show()
                 startActivity(Intent(this, AdminDashboardActivity::class.java))
@@ -94,6 +100,24 @@ class LoginActivity : AppCompatActivity() {
         registerText.setOnClickListener {
             startActivity(Intent(this, RegisterActivity::class.java))
         }
+    }
+
+    private fun checkAdminSession() {
+        val prefs = getSharedPreferences("AdminSession", MODE_PRIVATE)
+        val isAdminLoggedIn = prefs.getBoolean("isAdminLoggedIn", false)
+        
+        if (isAdminLoggedIn) {
+            // Admin is already logged in, go directly to admin dashboard
+            startActivity(Intent(this, AdminDashboardActivity::class.java))
+            finish()
+        }
+    }
+
+    private fun saveAdminSession() {
+        val prefs = getSharedPreferences("AdminSession", MODE_PRIVATE)
+        prefs.edit()
+            .putBoolean("isAdminLoggedIn", true)
+            .apply()
     }
 
     private fun showLoginSuccessDialog(fullName: String, idNumber: String, course: String) {

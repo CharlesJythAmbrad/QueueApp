@@ -32,6 +32,12 @@ class ProfileFragment : Fragment() {
         db = FirebaseFirestore.getInstance()
         val currentUser = auth.currentUser
 
+        // Notification icon click
+        val notificationIcon = view.findViewById<android.widget.ImageView>(R.id.ivNotification)
+        notificationIcon.setOnClickListener {
+            showNotificationsDialog()
+        }
+
         val fullNameText = view.findViewById<TextView>(R.id.tvFullName)
         val courseText = view.findViewById<TextView>(R.id.tvCourse)
         val idNumberText = view.findViewById<TextView>(R.id.tvIdNumber)
@@ -164,5 +170,13 @@ class ProfileFragment : Fragment() {
             .addOnFailureListener { e ->
                 Toast.makeText(requireContext(), "Current password is incorrect", Toast.LENGTH_SHORT).show()
             }
+    }
+
+    private fun showNotificationsDialog() {
+        androidx.appcompat.app.AlertDialog.Builder(requireContext())
+            .setTitle("🔔 Notifications")
+            .setMessage("Profile Updates:\n\n• Account security alerts\n• Password change confirmations\n• System maintenance notices\n• Important announcements\n\nStay informed about your account!")
+            .setPositiveButton("OK", null)
+            .show()
     }
 }

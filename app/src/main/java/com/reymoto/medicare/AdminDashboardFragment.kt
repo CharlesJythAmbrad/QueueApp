@@ -214,16 +214,15 @@ class AdminDashboardFragment : Fragment() {
     }
 
     private fun callNextQueue(department: String) {
-        // Get next pending queue
+        // Get next pending queue (try without orderBy first to avoid index issues)
         db.collection("appointments")
             .whereEqualTo("department", department)
             .whereEqualTo("status", "Pending")
-            .orderBy("timestamp")
             .limit(1)
             .get()
             .addOnSuccessListener { pendingDocs ->
                 if (pendingDocs.isEmpty) {
-                    Toast.makeText(context, "No pending queues to call", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, "No request queue yet for $department department", Toast.LENGTH_LONG).show()
                     return@addOnSuccessListener
                 }
 
@@ -255,58 +254,13 @@ class AdminDashboardFragment : Fragment() {
                         Toast.makeText(context, "Now serving: ${if (department == "Finance") financeCounter else registrarCounter} - Queue: $queueNumber", Toast.LENGTH_SHORT).show()
                     }
                     .addOnFailureListener { e ->
-                        Toast.makeText(context, "Error updating queue: ${e.message}", Toast.LENGTH_LONG).show()
+                        // Only show user-friendly message, not technical error
+                        Toast.makeText(context, "Unable to call next queue. Please try again.", Toast.LENGTH_SHORT).show()
                     }
             }
             .addOnFailureListener { e ->
-                Toast.makeText(context, "Error fetching queues: ${e.message}", Toast.LENGTH_LONG).show()
-                
-                // If orderBy fails due to missing index, try without ordering
-                db.collection("appointments")
-                    .whereEqualTo("department", department)
-                    .whereEqualTo("status", "Pending")
-                    .limit(1)
-                    .get()
-                    .addOnSuccessListener { pendingDocs ->
-                        if (pendingDocs.isEmpty) {
-                            Toast.makeText(context, "No pending queues to call", Toast.LENGTH_SHORT).show()
-                            return@addOnSuccessListener
-                        }
-
-                        val doc = pendingDocs.documents[0]
-                        val queueNumber = doc.getString("queueNumber") ?: ""
-                        
-                        // Increment counter first
-                        if (department == "Finance") {
-                            financeCounter++
-                            tvFinanceServing.text = financeCounter.toString()
-                        } else {
-                            registrarCounter++
-                            tvRegistrarServing.text = registrarCounter.toString()
-                        }
-                        
-                        saveCounters()
-                        
-                        // Update Firestore serving counter document for real-time sync
-                        updateFirestoreCounters()
-                        
-                        // Update status to Serving and store the serving number
-                        val updates = hashMapOf<String, Any>(
-                            "status" to "Serving",
-                            "servingNumber" to if (department == "Finance") financeCounter else registrarCounter
-                        )
-                        
-                        doc.reference.update(updates)
-                            .addOnSuccessListener {
-                                Toast.makeText(context, "Now serving: ${if (department == "Finance") financeCounter else registrarCounter} - Queue: $queueNumber", Toast.LENGTH_SHORT).show()
-                            }
-                            .addOnFailureListener { e2 ->
-                                Toast.makeText(context, "Error updating queue: ${e2.message}", Toast.LENGTH_LONG).show()
-                            }
-                    }
-                    .addOnFailureListener { e2 ->
-                        Toast.makeText(context, "Error: ${e2.message}", Toast.LENGTH_LONG).show()
-                    }
+                // Don't show technical error messages, just show user-friendly message
+                Toast.makeText(context, "No request queue yet for $department department", Toast.LENGTH_LONG).show()
             }
     }
 

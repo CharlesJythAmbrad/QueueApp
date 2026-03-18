@@ -11,15 +11,34 @@
         android:orientation="vertical"
         android:gravity="center_horizontal">
 
-        <TextView
-            android:layout_width="wrap_content"
+        <!-- Header with Title and Notification Icon -->
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Profile"
-            android:textSize="26sp"
-            android:textStyle="bold"
-            android:textColor="@color/primary_color"
-            android:layout_marginTop="20dp"
-            android:layout_marginBottom="30dp"/>
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="40dp">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Profile"
+                android:textSize="26sp"
+                android:textStyle="bold"
+                android:textColor="@color/primary_color"
+                android:layout_marginTop="10dp"/>
+
+            <ImageView
+                android:id="@+id/ivNotification"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:src="@drawable/bell"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:padding="4dp"
+                android:layout_marginTop="10dp"
+                android:contentDescription="Notifications" />
+        </LinearLayout>
 
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"

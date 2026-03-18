@@ -162,6 +162,10 @@ class AdminDashboardActivity : AppCompatActivity() {
     private fun performLogout() {
         auth.signOut()
         
+        // Clear admin session
+        val adminSessionPrefs = getSharedPreferences("AdminSession", MODE_PRIVATE)
+        adminSessionPrefs.edit().clear().apply()
+        
         // Clear admin preferences
         val prefs = getSharedPreferences("AdminQueuePrefs", MODE_PRIVATE)
         prefs.edit().clear().apply()
