@@ -12,10 +12,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
-import java.text.SimpleDateFormat
-import java.util.*
 
-class QueueFragment : Fragment() {
+class QueueFragment : Fragment(), NotificationManager.NotificationListener {
 
     private lateinit var auth: FirebaseAuth
     private lateinit var db: FirebaseFirestore
@@ -23,6 +21,7 @@ class QueueFragment : Fragment() {
     private lateinit var progressBar: ProgressBar
     private lateinit var emptyView: TextView
     private lateinit var queueAdapter: QueueAdapter
+    private lateinit var notificationBadge: TextView
     private val queueList = mutableListOf<Appointment>()
 
     override fun onCreateView(
@@ -30,16 +29,22 @@ class QueueFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val view = inflater.inflate(R.layout.fragment_queue, container, false)
+        val view = inflater.inflate(R.layout.history_queue, container, false)
         
         auth = FirebaseAuth.getInstance()
         db = FirebaseFirestore.getInstance()
 
         // Notification icon click
         val notificationIcon = view.findViewById<android.widget.ImageView>(R.id.ivNotification)
+        notificationBadge = view.findViewById<TextView>(R.id.tvNotificationBadge)
+        
         notificationIcon.setOnClickListener {
-            showNotificationsDialog()
+            showStoredNotifications()
         }
+        
+        // Register for notification updates
+        NotificationManager.addListener(this)
+        updateNotificationBadge()
 
         initViews(view)
         setupRecyclerView()
@@ -77,7 +82,6 @@ class QueueFragment : Fragment() {
 
         db.collection("appointments")
             .whereEqualTo("studentUID", currentUser.uid)
-            .orderBy("timestamp", Query.Direction.DESCENDING)
             .get()
             .addOnSuccessListener { documents ->
                 showLoading(false)
@@ -97,6 +101,9 @@ class QueueFragment : Fragment() {
                     queueList.add(appointment)
                 }
 
+                // Sort by timestamp in descending order (newest first)
+                queueList.sortByDescending { it.timestamp?.toDate() }
+
                 queueAdapter.notifyDataSetChanged()
                 
                 if (queueList.isEmpty()) {
@@ -108,7 +115,8 @@ class QueueFragment : Fragment() {
             .addOnFailureListener { exception ->
                 showLoading(false)
                 showEmptyView(true)
-                Toast.makeText(requireContext(), "Error loading queue: ${exception.message}", Toast.LENGTH_LONG).show()
+                // Don't show technical error messages, just show user-friendly message
+                Toast.makeText(requireContext(), "Unable to load queue history. Please try again.", Toast.LENGTH_SHORT).show()
             }
     }
 
@@ -132,7 +140,8 @@ class QueueFragment : Fragment() {
                 loadMyQueueHistory()
             }
             .addOnFailureListener { exception ->
-                Toast.makeText(requireContext(), "Error cancelling queue: ${exception.message}", Toast.LENGTH_LONG).show()
+                // Don't show technical error messages
+                Toast.makeText(requireContext(), "Unable to cancel queue. Please try again.", Toast.LENGTH_SHORT).show()
             }
     }
 
@@ -146,11 +155,79 @@ class QueueFragment : Fragment() {
         recyclerView.visibility = if (show) View.GONE else View.VISIBLE
     }
 
-    private fun showNotificationsDialog() {
+    private fun showStoredNotifications() {
+        val notifications = NotificationManager.getNotifications()
+        
+        if (notifications.isEmpty()) {
+            androidx.appcompat.app.AlertDialog.Builder(requireContext())
+                .setTitle("🔔 Notifications")
+                .setMessage("No notifications yet.\n\nYou'll receive notifications about:\n• Queue status changes\n• Completion updates\n• Service reminders")
+                .setPositiveButton("OK", null)
+                .show()
+            return
+        }
+
+        // Mark all as read when viewing
+        NotificationManager.markAllAsRead()
+
+        // Create notification list dialog
+        val notificationTexts = notifications.map { notification ->
+            val timeFormat = java.text.SimpleDateFormat("MMM dd, HH:mm", java.util.Locale.getDefault())
+            val timeStr = timeFormat.format(notification.timestamp)
+            val icon = when (notification.type) {
+                NotificationType.NEAR_SERVING -> "⏰"
+                NotificationType.YOUR_TURN -> "🎯"
+                NotificationType.QUEUE_UPDATE -> "📋"
+                NotificationType.SYSTEM -> "🔔"
+            }
+            "$icon ${notification.title}\n${notification.message}\n$timeStr"
+        }.toTypedArray()
+
         androidx.appcompat.app.AlertDialog.Builder(requireContext())
-            .setTitle("🔔 Notifications")
-            .setMessage("Queue History Updates:\n\n• Queue status changes\n• Completion notifications\n• Cancellation confirmations\n• Service reminders\n\nTrack your queue activities here!")
+            .setTitle("🔔 Notifications (${notifications.size})")
+            .setItems(notificationTexts) { _, which ->
+                val notification = notifications[which]
+                showNotificationDetail(notification)
+            }
+            .setNegativeButton("Clear All") { _, _ ->
+                NotificationManager.clearAll()
+            }
+            .setNeutralButton("Close", null)
+            .show()
+    }
+
+    private fun showNotificationDetail(notification: NotificationItem) {
+        val timeFormat = java.text.SimpleDateFormat("MMMM dd, yyyy 'at' HH:mm", java.util.Locale.getDefault())
+        val timeStr = timeFormat.format(notification.timestamp)
+        
+        androidx.appcompat.app.AlertDialog.Builder(requireContext())
+            .setTitle(notification.title)
+            .setMessage("${notification.message}\n\nReceived: $timeStr")
             .setPositiveButton("OK", null)
             .show()
+    }
+
+    private fun updateNotificationBadge() {
+        val count = NotificationManager.getUnreadCount()
+        if (count > 0) {
+            notificationBadge.text = if (count > 99) "99+" else count.toString()
+            notificationBadge.visibility = android.view.View.VISIBLE
+        } else {
+            notificationBadge.visibility = android.view.View.GONE
+        }
+    }
+
+    // NotificationManager.NotificationListener implementation
+    override fun onNotificationAdded(notification: NotificationItem) {
+        // History fragment doesn't show immediate popups
+    }
+
+    override fun onNotificationCountChanged(count: Int) {
+        updateNotificationBadge()
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        NotificationManager.removeListener(this)
     }
 }

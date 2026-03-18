@@ -16,10 +16,11 @@ import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
-class ProfileFragment : Fragment() {
+class ProfileFragment : Fragment(), NotificationManager.NotificationListener {
 
     private lateinit var auth: FirebaseAuth
     private lateinit var db: FirebaseFirestore
+    private lateinit var notificationBadge: TextView
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -34,9 +35,15 @@ class ProfileFragment : Fragment() {
 
         // Notification icon click
         val notificationIcon = view.findViewById<android.widget.ImageView>(R.id.ivNotification)
+        notificationBadge = view.findViewById<TextView>(R.id.tvNotificationBadge)
+        
         notificationIcon.setOnClickListener {
-            showNotificationsDialog()
+            showStoredNotifications()
         }
+        
+        // Register for notification updates
+        NotificationManager.addListener(this)
+        updateNotificationBadge()
 
         val fullNameText = view.findViewById<TextView>(R.id.tvFullName)
         val courseText = view.findViewById<TextView>(R.id.tvCourse)
@@ -172,11 +179,79 @@ class ProfileFragment : Fragment() {
             }
     }
 
-    private fun showNotificationsDialog() {
+    private fun showStoredNotifications() {
+        val notifications = NotificationManager.getNotifications()
+        
+        if (notifications.isEmpty()) {
+            androidx.appcompat.app.AlertDialog.Builder(requireContext())
+                .setTitle("🔔 Notifications")
+                .setMessage("No notifications yet.\n\nYou'll receive notifications about:\n• Account security alerts\n• Password changes\n• System updates")
+                .setPositiveButton("OK", null)
+                .show()
+            return
+        }
+
+        // Mark all as read when viewing
+        NotificationManager.markAllAsRead()
+
+        // Create notification list dialog
+        val notificationTexts = notifications.map { notification ->
+            val timeFormat = java.text.SimpleDateFormat("MMM dd, HH:mm", java.util.Locale.getDefault())
+            val timeStr = timeFormat.format(notification.timestamp)
+            val icon = when (notification.type) {
+                NotificationType.NEAR_SERVING -> "⏰"
+                NotificationType.YOUR_TURN -> "🎯"
+                NotificationType.QUEUE_UPDATE -> "📋"
+                NotificationType.SYSTEM -> "🔔"
+            }
+            "$icon ${notification.title}\n${notification.message}\n$timeStr"
+        }.toTypedArray()
+
         androidx.appcompat.app.AlertDialog.Builder(requireContext())
-            .setTitle("🔔 Notifications")
-            .setMessage("Profile Updates:\n\n• Account security alerts\n• Password change confirmations\n• System maintenance notices\n• Important announcements\n\nStay informed about your account!")
+            .setTitle("🔔 Notifications (${notifications.size})")
+            .setItems(notificationTexts) { _, which ->
+                val notification = notifications[which]
+                showNotificationDetail(notification)
+            }
+            .setNegativeButton("Clear All") { _, _ ->
+                NotificationManager.clearAll()
+            }
+            .setNeutralButton("Close", null)
+            .show()
+    }
+
+    private fun showNotificationDetail(notification: NotificationItem) {
+        val timeFormat = java.text.SimpleDateFormat("MMMM dd, yyyy 'at' HH:mm", java.util.Locale.getDefault())
+        val timeStr = timeFormat.format(notification.timestamp)
+        
+        androidx.appcompat.app.AlertDialog.Builder(requireContext())
+            .setTitle(notification.title)
+            .setMessage("${notification.message}\n\nReceived: $timeStr")
             .setPositiveButton("OK", null)
             .show()
+    }
+
+    private fun updateNotificationBadge() {
+        val count = NotificationManager.getUnreadCount()
+        if (count > 0) {
+            notificationBadge.text = if (count > 99) "99+" else count.toString()
+            notificationBadge.visibility = android.view.View.VISIBLE
+        } else {
+            notificationBadge.visibility = android.view.View.GONE
+        }
+    }
+
+    // NotificationManager.NotificationListener implementation
+    override fun onNotificationAdded(notification: NotificationItem) {
+        // Profile fragment doesn't show immediate popups
+    }
+
+    override fun onNotificationCountChanged(count: Int) {
+        updateNotificationBadge()
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        NotificationManager.removeListener(this)
     }
 }
