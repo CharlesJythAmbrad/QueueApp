@@ -43,24 +43,24 @@ class AdminDashboardFragment : Fragment() {
         
         db = FirebaseFirestore.getInstance()
         
-        // Check if daily reset is needed
-        checkAndPerformDailyReset()
-        
-        // Load saved counters
-        loadCounters()
-        
-        // Initialize Firestore serving counters document with current values
-        initializeFirestoreCounters()
-        
-        // Initialize views
+        // Initialize views first
         tvFinanceServing = view.findViewById(R.id.tvFinanceServing)
         tvRegistrarServing = view.findViewById(R.id.tvRegistrarServing)
         tvFinancePending = view.findViewById(R.id.tvFinancePending)
         tvRegistrarPending = view.findViewById(R.id.tvRegistrarPending)
         
-        // Set initial counter values
+        // Check if daily reset is needed
+        checkAndPerformDailyReset()
+        
+        // Load saved counters from SharedPreferences
+        loadCounters()
+        
+        // Set initial counter values from local storage
         tvFinanceServing.text = financeCounter.toString()
         tvRegistrarServing.text = registrarCounter.toString()
+        
+        // Then sync with Firestore (this may update the UI if Firestore has newer values)
+        initializeFirestoreCounters()
         
         val btnFinanceNext = view.findViewById<Button>(R.id.btnFinanceNext)
         val btnRegistrarNext = view.findViewById<Button>(R.id.btnRegistrarNext)
@@ -79,20 +79,41 @@ class AdminDashboardFragment : Fragment() {
         val prefs = requireContext().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
         val today = dateFormat.format(Date())
-        val lastResetDate = prefs.getString(LAST_RESET_DATE_KEY, "")
+        val lastResetDate = prefs.getString(LAST_RESET_DATE_KEY, "") ?: ""
         
-        android.util.Log.d("AdminDashboard", "Checking daily reset - Today: $today, Last reset: $lastResetDate")
+        android.util.Log.d("AdminDashboard", "Checking daily reset - Today: '$today', Last reset: '$lastResetDate'")
         
-        if (lastResetDate != today) {
+        // Only reset if lastResetDate is empty (first time) or different from today
+        if (lastResetDate.isEmpty()) {
+            android.util.Log.d("AdminDashboard", "First time setup - setting reset date but not resetting counters")
+            // First time, just set the date without resetting counters
+            prefs.edit().putString(LAST_RESET_DATE_KEY, today).apply()
+        } else if (lastResetDate != today) {
             // It's a new day, reset counters
-            android.util.Log.d("AdminDashboard", "Performing daily reset - new day detected")
+            android.util.Log.d("AdminDashboard", "Performing daily reset - new day detected: '$lastResetDate' -> '$today'")
             resetCountersAutomatically()
             
             // Save today's date as the last reset date
             prefs.edit().putString(LAST_RESET_DATE_KEY, today).apply()
         } else {
-            android.util.Log.d("AdminDashboard", "No daily reset needed - same day")
+            android.util.Log.d("AdminDashboard", "No daily reset needed - same day: '$lastResetDate' == '$today'")
         }
+    }
+    
+    // Method to manually force a reset (for testing purposes)
+    fun forceResetCounters() {
+        android.util.Log.d("AdminDashboard", "Force resetting counters manually")
+        resetCountersAutomatically()
+        
+        // Update the reset date to today
+        val prefs = requireContext().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+        val today = dateFormat.format(Date())
+        prefs.edit().putString(LAST_RESET_DATE_KEY, today).apply()
+        
+        // Update UI
+        tvFinanceServing.text = "0"
+        tvRegistrarServing.text = "0"
     }
 
     private fun resetCountersAutomatically() {
@@ -131,10 +152,16 @@ class AdminDashboardFragment : Fragment() {
         financeCounter = prefs.getInt(FINANCE_COUNTER_KEY, 0)
         registrarCounter = prefs.getInt(REGISTRAR_COUNTER_KEY, 0)
         
-        android.util.Log.d("AdminDashboard", "Loaded counters - Finance: $financeCounter, Registrar: $registrarCounter")
+        android.util.Log.d("AdminDashboard", "Loaded counters from SharedPreferences - Finance: $financeCounter, Registrar: $registrarCounter")
+        
+        // Additional debug: check if prefs file exists and has data
+        val allPrefs = prefs.all
+        android.util.Log.d("AdminDashboard", "All SharedPreferences data: $allPrefs")
     }
 
     private fun initializeFirestoreCounters() {
+        android.util.Log.d("AdminDashboard", "Initializing Firestore counters - Current local values: Finance=$financeCounter, Registrar=$registrarCounter")
+        
         // Check if Firestore document exists and is from today
         db.collection("system").document("servingCounters")
             .get()
@@ -151,47 +178,45 @@ class AdminDashboardFragment : Fragment() {
                         ""
                     }
                     
-                    android.util.Log.d("AdminDashboard", "Firestore document exists - Reset date: $resetDate, Doc date: $docDate, Today: $today")
+                    android.util.Log.d("AdminDashboard", "Firestore document exists - Reset date: '$resetDate', Doc date: '$docDate', Today: '$today'")
                     
                     // Check if document is from today (either by resetDate or lastUpdated)
                     val isFromToday = resetDate == today || docDate == today
                     
                     if (isFromToday) {
-                        // Document is from today, sync local counters with Firestore
+                        // Document is from today, use Firestore values as the source of truth
                         val firestoreFinanceCounter = document.getLong("financeCounter")?.toInt() ?: 0
                         val firestoreRegistrarCounter = document.getLong("registrarCounter")?.toInt() ?: 0
                         
-                        android.util.Log.d("AdminDashboard", "Syncing with Firestore - Local Finance: $financeCounter, Firestore Finance: $firestoreFinanceCounter")
-                        android.util.Log.d("AdminDashboard", "Syncing with Firestore - Local Registrar: $registrarCounter, Firestore Registrar: $firestoreRegistrarCounter")
+                        android.util.Log.d("AdminDashboard", "Document is from today - Firestore values: Finance=$firestoreFinanceCounter, Registrar=$firestoreRegistrarCounter")
+                        android.util.Log.d("AdminDashboard", "Local values before sync: Finance=$financeCounter, Registrar=$registrarCounter")
                         
-                        // Use the higher value between local and Firestore (in case of multiple admin sessions)
-                        financeCounter = maxOf(financeCounter, firestoreFinanceCounter)
-                        registrarCounter = maxOf(registrarCounter, firestoreRegistrarCounter)
+                        // Always use Firestore values for consistency across admin sessions
+                        financeCounter = firestoreFinanceCounter
+                        registrarCounter = firestoreRegistrarCounter
                         
                         // Update UI and save to SharedPreferences
                         tvFinanceServing.text = financeCounter.toString()
                         tvRegistrarServing.text = registrarCounter.toString()
                         saveCounters()
                         
-                        // Update Firestore if local values are higher
-                        if (financeCounter > firestoreFinanceCounter || registrarCounter > firestoreRegistrarCounter) {
-                            android.util.Log.d("AdminDashboard", "Updating Firestore with higher local values")
-                            updateFirestoreCounters()
-                        }
+                        android.util.Log.d("AdminDashboard", "Counters synchronized with Firestore - Finance: $financeCounter, Registrar: $registrarCounter")
                     } else {
-                        // Document is from previous day, update with current (reset) values
-                        android.util.Log.d("AdminDashboard", "Document is from previous day, updating with current values")
+                        // Document is from previous day, this should have been handled by daily reset
+                        android.util.Log.d("AdminDashboard", "Document is from previous day - using local values and updating Firestore")
+                        // Use current local values (which should be 0 from daily reset or preserved from previous session)
                         updateFirestoreCounters()
                     }
                 } else {
-                    // Document doesn't exist, create it
-                    android.util.Log.d("AdminDashboard", "Firestore document doesn't exist, creating it")
+                    // Document doesn't exist, create it with current local values
+                    android.util.Log.d("AdminDashboard", "Firestore document doesn't exist - creating with local values: Finance=$financeCounter, Registrar=$registrarCounter")
                     updateFirestoreCounters()
                 }
             }
             .addOnFailureListener { e ->
                 android.util.Log.e("AdminDashboard", "Error checking serving counters: ${e.message}")
-                // Fallback: create/update document
+                // Fallback: use local values and try to update Firestore
+                android.util.Log.d("AdminDashboard", "Using local values as fallback - Finance: $financeCounter, Registrar: $registrarCounter")
                 updateFirestoreCounters()
             }
     }
@@ -226,6 +251,13 @@ class AdminDashboardFragment : Fragment() {
             putInt(REGISTRAR_COUNTER_KEY, registrarCounter)
             apply()
         }
+        
+        android.util.Log.d("AdminDashboard", "Saved counters to SharedPreferences - Finance: $financeCounter, Registrar: $registrarCounter")
+        
+        // Verify the save worked
+        val savedFinance = prefs.getInt(FINANCE_COUNTER_KEY, -1)
+        val savedRegistrar = prefs.getInt(REGISTRAR_COUNTER_KEY, -1)
+        android.util.Log.d("AdminDashboard", "Verified saved counters - Finance: $savedFinance, Registrar: $savedRegistrar")
     }
 
     private fun setupRealtimeListeners() {

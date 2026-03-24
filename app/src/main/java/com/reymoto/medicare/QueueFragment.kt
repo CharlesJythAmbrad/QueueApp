@@ -47,6 +47,7 @@ class QueueFragment : Fragment(), NotificationManager.NotificationListener {
         updateNotificationBadge()
 
         initViews(view)
+        initializeAdapter()
         setupRecyclerView()
         loadMyQueueHistory()
 
@@ -62,11 +63,16 @@ class QueueFragment : Fragment(), NotificationManager.NotificationListener {
         progressBar = view.findViewById(R.id.progressBar)
         emptyView = view.findViewById(R.id.tvEmptyView)
     }
+    
+    private fun initializeAdapter() {
+        queueAdapter = QueueAdapter(queueList) { appointment ->
+            // Handle queue item click if needed
+            showQueueDetails(appointment)
+        }
+    }
 
     private fun setupRecyclerView() {
-        queueAdapter = QueueAdapter(queueList) { appointment ->
-            showCancelConfirmation(appointment)
-        }
+
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
         recyclerView.adapter = queueAdapter
     }
@@ -88,17 +94,22 @@ class QueueFragment : Fragment(), NotificationManager.NotificationListener {
                 queueList.clear()
 
                 for (document in documents) {
-                    val appointment = Appointment(
-                        id = document.id,
-                        studentEmail = document.getString("studentEmail") ?: "",
-                        transactionType = document.getString("transactionType") ?: "",
-                        appointmentDate = document.getString("appointmentDate") ?: "",
-                        appointmentTime = document.getString("appointmentTime") ?: "",
-                        queueNumber = document.getString("queueNumber") ?: "",
-                        status = document.getString("status") ?: "Pending",
-                        timestamp = document.getTimestamp("timestamp")
-                    )
-                    queueList.add(appointment)
+                    val status = document.getString("status") ?: "Pending"
+                    
+                    // Only include non-pending queues in history
+                    if (status != "Pending") {
+                        val appointment = Appointment(
+                            id = document.id,
+                            studentEmail = document.getString("studentEmail") ?: "",
+                            transactionType = document.getString("transactionType") ?: "",
+                            appointmentDate = document.getString("appointmentDate") ?: "",
+                            appointmentTime = document.getString("appointmentTime") ?: "",
+                            queueNumber = document.getString("queueNumber") ?: "",
+                            status = if (status == "Serving") "Served" else status, // Change "Serving" to "Served"
+                            timestamp = document.getTimestamp("timestamp")
+                        )
+                        queueList.add(appointment)
+                    }
                 }
 
                 // Sort by timestamp in descending order (newest first)
@@ -120,30 +131,9 @@ class QueueFragment : Fragment(), NotificationManager.NotificationListener {
             }
     }
 
-    private fun showCancelConfirmation(appointment: Appointment) {
-        AlertDialog.Builder(requireContext())
-            .setTitle("Cancel Queue")
-            .setMessage("Are you sure you want to cancel queue ${appointment.queueNumber}?")
-            .setPositiveButton("Yes") { _, _ ->
-                cancelQueue(appointment)
-            }
-            .setNegativeButton("No", null)
-            .show()
-    }
 
-    private fun cancelQueue(appointment: Appointment) {
-        db.collection("appointments")
-            .document(appointment.id)
-            .update("status", "Cancelled")
-            .addOnSuccessListener {
-                Toast.makeText(requireContext(), "Queue cancelled successfully", Toast.LENGTH_SHORT).show()
-                loadMyQueueHistory()
-            }
-            .addOnFailureListener { exception ->
-                // Don't show technical error messages
-                Toast.makeText(requireContext(), "Unable to cancel queue. Please try again.", Toast.LENGTH_SHORT).show()
-            }
-    }
+
+
 
     private fun showLoading(show: Boolean) {
         progressBar.visibility = if (show) View.VISIBLE else View.GONE
@@ -215,6 +205,50 @@ class QueueFragment : Fragment(), NotificationManager.NotificationListener {
         } else {
             notificationBadge.visibility = android.view.View.GONE
         }
+    }
+    
+    private fun showQueueDetails(appointment: Appointment) {
+        val status = when (appointment.status) {
+            "Pending" -> "⏳ Waiting in queue"
+            "Serving" -> "🟢 Currently being served"
+            "Served" -> "🟢 Served"
+            "Completed" -> "✅ Completed"
+            "Cancelled" -> "❌ Cancelled"
+            else -> appointment.status ?: "Unknown"
+        }
+        
+        // Extract department from queue number (format: YYYY-MM-DD-DEPT-XXX)
+        val department = if (appointment.queueNumber.isNotEmpty()) {
+            val parts = appointment.queueNumber.split("-")
+            if (parts.size >= 4) {
+                when (parts[3]) {
+                    "FIN" -> "Finance"
+                    "REG" -> "Registrar"
+                    else -> parts[3]
+                }
+            } else {
+                "Unknown"
+            }
+        } else {
+            "Unknown"
+        }
+        
+        val message = buildString {
+            append("Queue Number: ${appointment.queueNumber}\n")
+            append("Department: $department\n")
+            append("Transaction: ${appointment.transactionType}\n")
+            append("Status: $status\n")
+            append("Date: ${appointment.appointmentDate}\n")
+            if (!appointment.appointmentTime.isNullOrEmpty()) {
+                append("Time: ${appointment.appointmentTime}\n")
+            }
+        }
+        
+        AlertDialog.Builder(requireContext())
+            .setTitle("Queue Details")
+            .setMessage(message)
+            .setPositiveButton("OK", null)
+            .show()
     }
 
     // NotificationManager.NotificationListener implementation

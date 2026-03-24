@@ -275,6 +275,12 @@ class DashboardFragment : Fragment(), NotificationManager.NotificationListener {
         val positionDifference = userQueueNum - servingNumber
 
         when {
+            // User's queue number is less than serving number - they've already been served or passed
+            positionDifference < 0 -> {
+                // Stop all notifications - user's turn has passed
+                resetNotificationFlags()
+                return
+            }
             // User's turn - serving number matches user's queue number
             positionDifference == 0 && !hasNotifiedYourTurn -> {
                 showYourTurnNotification(departmentName)
@@ -403,6 +409,50 @@ class DashboardFragment : Fragment(), NotificationManager.NotificationListener {
 
     override fun onNotificationCountChanged(count: Int) {
         updateNotificationBadge()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        
+        // Update notification badge when returning to dashboard
+        updateNotificationBadge()
+        
+        // Check if user's turn has already passed to prevent stale notifications
+        if (currentUserQueueNumber != null && currentUserDepartment != null) {
+            db.collection("system").document("servingCounters")
+                .get()
+                .addOnSuccessListener { document ->
+                    if (document != null && document.exists()) {
+                        val financeCounter = document.getLong("financeCounter")?.toInt() ?: 0
+                        val registrarCounter = document.getLong("registrarCounter")?.toInt() ?: 0
+                        
+                        // Check if user's turn has passed and reset flags if needed
+                        checkIfTurnHasPassed(financeCounter, registrarCounter)
+                    }
+                }
+        }
+    }
+    
+    private fun checkIfTurnHasPassed(financeServing: Int, registrarServing: Int) {
+        if (currentUserQueueNumber == null || currentUserDepartment == null) {
+            return
+        }
+
+        // Extract queue number from format like "2026-03-14-FIN-001"
+        val queueParts = currentUserQueueNumber!!.split("-")
+        if (queueParts.size < 5) return
+        
+        val userQueueNum = queueParts[4].toIntOrNull() ?: return
+        val servingNumber = when (currentUserDepartment) {
+            "Finance" -> financeServing
+            "Registrar" -> registrarServing
+            else -> return
+        }
+
+        // If user's turn has passed, reset notification flags
+        if (userQueueNum < servingNumber) {
+            resetNotificationFlags()
+        }
     }
 
     override fun onDestroyView() {

@@ -58,6 +58,7 @@ class AdminDashboardActivity : AppCompatActivity() {
         popupMenu.menu.add(0, 3, 0, "🗑️ Clear Completed Queues")
         popupMenu.menu.add(0, 4, 0, "⚙️ Admin Settings")
         popupMenu.menu.add(0, 5, 0, "📱 System Info")
+        popupMenu.menu.add(0, 7, 0, "🔄 Reset Counters (Test)")
         popupMenu.menu.add(0, 6, 0, "🚪 Logout")
         
         popupMenu.setOnMenuItemClickListener { menuItem ->
@@ -80,6 +81,10 @@ class AdminDashboardActivity : AppCompatActivity() {
                 }
                 5 -> {
                     showSystemInfo()
+                    true
+                }
+                7 -> {
+                    showResetCountersDialog()
                     true
                 }
                 6 -> {
@@ -146,6 +151,28 @@ class AdminDashboardActivity : AppCompatActivity() {
             .setMessage("MediCare Queue Management System\n\nVersion: 1.0.0\nBuild: 2024.03.13\nDatabase: Firebase Firestore\nAuthentication: Firebase Auth\n\nDeveloped for:\nSouthwestern University PHINMA\nUrgello, Cebu City\n\nAdmin Panel Features:\n• Real-time queue management\n• Analytics & reporting\n• Multi-department support\n• Location-based validation")
             .setPositiveButton("OK", null)
             .show()
+    }
+    
+    private fun showResetCountersDialog() {
+        AlertDialog.Builder(this)
+            .setTitle("⚠️ Reset Counters")
+            .setMessage("This will reset the 'Now Serving' counters back to 0 for both Finance and Registrar departments.\n\nThis is intended for testing purposes. Use with caution.\n\nContinue?")
+            .setPositiveButton("Reset") { _, _ ->
+                resetCountersManually()
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+    
+    private fun resetCountersManually() {
+        // Get the current fragment and call the reset method if it's AdminDashboardFragment
+        val currentFragment = supportFragmentManager.findFragmentById(R.id.adminFragmentContainer)
+        if (currentFragment is AdminDashboardFragment) {
+            currentFragment.forceResetCounters()
+            Toast.makeText(this, "Counters reset to 0", Toast.LENGTH_SHORT).show()
+        } else {
+            Toast.makeText(this, "Please go to Dashboard tab to reset counters", Toast.LENGTH_SHORT).show()
+        }
     }
 
     private fun showLogoutConfirmation() {

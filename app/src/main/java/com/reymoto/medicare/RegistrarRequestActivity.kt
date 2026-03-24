@@ -22,7 +22,6 @@ class RegistrarRequestActivity : AppCompatActivity() {
     // Step 1 data
     private var familyName = ""
     private var firstName = ""
-    private var middleName = ""
     private var courseYear = ""
     private var studentNumber = ""
     private var lastTerm = ""
@@ -97,13 +96,7 @@ class RegistrarRequestActivity : AppCompatActivity() {
         spinnerLastTerm.adapter = adapter
         
         btnNext.setOnClickListener {
-
             lastTerm = spinnerLastTerm.selectedItem.toString()
-            
-            if (middleName.isEmpty()) {
-                Toast.makeText(this, "Please enter middle name", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
             
             if (lastTerm == "Select Term") {
                 Toast.makeText(this, "Please select last term", Toast.LENGTH_SHORT).show()
@@ -251,7 +244,6 @@ class RegistrarRequestActivity : AppCompatActivity() {
                 // Personal Data
                 "familyName" to familyName,
                 "firstName" to firstName,
-                "middleName" to middleName,
                 "courseYear" to courseYear,
                 "studentNumber" to studentNumber,
                 "lastTerm" to lastTerm,
