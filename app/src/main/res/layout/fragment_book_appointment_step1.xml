@@ -197,16 +197,15 @@
         <!-- Next Button -->
         <Button
             android:id="@+id/btnNext"
-            android:layout_width="wrap_content"
-            android:layout_height="48dp"
-            android:text="Next  →"
-            android:textSize="15sp"
-            android:textColor="#616161"
-
-            android:paddingStart="32dp"
-            android:paddingEnd="32dp"
-            android:background="@android:drawable/dialog_holo_light_frame"
-            android:layout_gravity="center_horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:text="Next →"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textAllCaps="false"
+            android:textColor="#FFFFFF"
+            android:backgroundTint="#1976D2"
+            android:layout_marginTop="8dp"
             android:layout_marginBottom="100dp"/>
 
     </LinearLayout>

@@ -83,13 +83,13 @@ class RegistrarRequestActivity : AppCompatActivity() {
         // Setup Last Term spinner
         val terms = arrayOf(
             "Select Term",
-            "1st Semester 2023-2024",
-            "2nd Semester 2023-2024",
-            "Summer 2024",
             "1st Semester 2024-2025",
             "2nd Semester 2024-2025",
             "Summer 2025",
-            "1st Semester 2025-2026"
+            "1st Semester 2025-2026",
+            "2nd Semester 2025-2026",
+            "Summer 2026",
+
         )
         val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, terms)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
@@ -148,6 +148,7 @@ class RegistrarRequestActivity : AppCompatActivity() {
         val etOthersPurpose = findViewById<EditText>(R.id.etOthersPurpose)
         val btnBack = findViewById<Button>(R.id.btnBack)
         val btnNext = findViewById<Button>(R.id.btnNext)
+
         
         btnBack.setOnClickListener {
             loadStep2()
@@ -176,51 +177,33 @@ class RegistrarRequestActivity : AppCompatActivity() {
     private fun loadStep4() {
         currentStep = 4
         setContentView(R.layout.activity_registrar_request_step4)
-        
-        val spinnerDate = findViewById<Spinner>(R.id.spinnerDate)
+
+        val tvDate = findViewById<TextView>(R.id.tvDate)       // <-- your TextView
         val etContactNumber = findViewById<EditText>(R.id.etContactNumber)
         val btnBack = findViewById<Button>(R.id.btnBack)
         val btnSubmit = findViewById<Button>(R.id.btnSubmit)
-        
+
         // Pre-fill contact number
         etContactNumber.setText(contactNumber)
-        
-        // Setup Date spinner with current date automatically selected
-        val dates = mutableListOf<String>()
+
+        // Set today's date
         val dateFormat = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault())
-        val calendar = Calendar.getInstance()
-        
-        // Add current date as the first and selected option
-        val todayDate = dateFormat.format(calendar.time)
-        dates.add(todayDate)
-        
-        // Add next 6 days as additional options
-        for (i in 1..6) {
-            calendar.add(Calendar.DAY_OF_MONTH, 1)
-            dates.add(dateFormat.format(calendar.time))
-        }
-        
-        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, dates)
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spinnerDate.adapter = adapter
-        
-        // Automatically select today's date (first item)
-        spinnerDate.setSelection(0)
-        selectedDate = todayDate
-        
+        val todayDate = dateFormat.format(Date())
+        tvDate.text = todayDate             // <-- this sets the TextView
+        selectedDate = todayDate            // <-- store it for submission
+
         btnBack.setOnClickListener {
             loadStep3()
         }
-        
+
         btnSubmit.setOnClickListener {
-            selectedDate = spinnerDate.selectedItem.toString()
             contactNumber = etContactNumber.text.toString().trim()
-            
+
             if (contactNumber.isEmpty() || contactNumber.length < 11) {
                 Toast.makeText(this, "Please enter a valid contact number", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
-            
+
             submitRequest()
         }
     }
@@ -238,7 +221,7 @@ class RegistrarRequestActivity : AppCompatActivity() {
                 "queueNumber" to queueNumber,
                 "status" to "Pending",
                 "timestamp" to Timestamp.now(),
-                "appointmentDate" to SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date()),
+                "appointmentDate" to selectedDate,
                 "appointmentTime" to SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date()),
                 
                 // Personal Data
@@ -275,7 +258,12 @@ class RegistrarRequestActivity : AppCompatActivity() {
     private fun generateDailyQueueNumber(callback: (String) -> Unit) {
         val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
         val today = dateFormat.format(Date())
-        
+        val tvDate = findViewById<TextView>(R.id.tvDate)
+
+        val todayDate = dateFormat.format(Date())
+
+        tvDate.text = todayDate
+        selectedDate = todayDate
         // Count today's Registrar queues
         db.collection("appointments")
             .whereEqualTo("department", "Registrar")
