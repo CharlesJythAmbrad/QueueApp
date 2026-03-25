@@ -123,7 +123,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Amount"
+            android:text="Total Amount"
             android:textSize="14sp"
             android:textColor="#424242"
             android:layout_marginBottom="4dp"/>
@@ -201,7 +201,7 @@
                 android:textSize="15sp"
                 android:textColor="#616161"
                 android:layout_marginEnd="8dp"
-                android:background="@android:drawable/dialog_holo_light_frame"/>
+                android:background="@drawable/button_primary"/>
 
             <Button
                 android:id="@+id/btnSubmit"
@@ -212,7 +212,7 @@
                 android:textSize="15sp"
                 android:textColor="#616161"
                 android:layout_marginStart="8dp"
-                android:background="@android:drawable/dialog_holo_light_frame"/>
+                android:background="@drawable/button_primary"/>
 
         </LinearLayout>
 

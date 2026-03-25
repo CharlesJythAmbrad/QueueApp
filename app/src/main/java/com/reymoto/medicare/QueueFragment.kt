@@ -22,7 +22,10 @@ class QueueFragment : Fragment(), NotificationManager.NotificationListener {
     private lateinit var emptyView: TextView
     private lateinit var queueAdapter: QueueAdapter
     private lateinit var notificationBadge: TextView
+    private lateinit var spinnerDepartment: Spinner
     private val queueList = mutableListOf<Appointment>()
+    private val allQueueList = mutableListOf<Appointment>() // Store all queues for filtering
+    private var selectedDepartment = "Finance" // Default to Finance
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -47,13 +50,12 @@ class QueueFragment : Fragment(), NotificationManager.NotificationListener {
         updateNotificationBadge()
 
         initViews(view)
+        setupDepartmentFilter()
         initializeAdapter()
         setupRecyclerView()
         loadMyQueueHistory()
 
-        view.findViewById<Button>(R.id.btnRefresh).setOnClickListener {
-            loadMyQueueHistory()
-        }
+
         
         return view
     }
@@ -62,12 +64,36 @@ class QueueFragment : Fragment(), NotificationManager.NotificationListener {
         recyclerView = view.findViewById(R.id.recyclerViewQueue)
         progressBar = view.findViewById(R.id.progressBar)
         emptyView = view.findViewById(R.id.tvEmptyView)
+        spinnerDepartment = view.findViewById(R.id.spinnerDepartment)
     }
     
     private fun initializeAdapter() {
         queueAdapter = QueueAdapter(queueList) { appointment ->
             // Handle queue item click if needed
             showQueueDetails(appointment)
+        }
+    }
+    
+    private fun setupDepartmentFilter() {
+        val departments = arrayOf("💰 Finance Department", "📄 Registrar Department")
+        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, departments)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinnerDepartment.adapter = adapter
+        
+        // Set Finance as default (index 0)
+        spinnerDepartment.setSelection(0)
+        
+        spinnerDepartment.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                selectedDepartment = when (position) {
+                    0 -> "Finance"
+                    1 -> "Registrar"
+                    else -> "Finance"
+                }
+                filterQueuesByDepartment()
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
         }
     }
 
@@ -91,7 +117,7 @@ class QueueFragment : Fragment(), NotificationManager.NotificationListener {
             .get()
             .addOnSuccessListener { documents ->
                 showLoading(false)
-                queueList.clear()
+                allQueueList.clear()
 
                 for (document in documents) {
                     val status = document.getString("status") ?: "Pending"
@@ -108,20 +134,15 @@ class QueueFragment : Fragment(), NotificationManager.NotificationListener {
                             status = if (status == "Serving") "Served" else status, // Change "Serving" to "Served"
                             timestamp = document.getTimestamp("timestamp")
                         )
-                        queueList.add(appointment)
+                        allQueueList.add(appointment)
                     }
                 }
 
                 // Sort by timestamp in descending order (newest first)
-                queueList.sortByDescending { it.timestamp?.toDate() }
+                allQueueList.sortByDescending { it.timestamp?.toDate() }
 
-                queueAdapter.notifyDataSetChanged()
-                
-                if (queueList.isEmpty()) {
-                    showEmptyView(true)
-                } else {
-                    showEmptyView(false)
-                }
+                // Apply department filter
+                filterQueuesByDepartment()
             }
             .addOnFailureListener { exception ->
                 showLoading(false)
@@ -129,6 +150,41 @@ class QueueFragment : Fragment(), NotificationManager.NotificationListener {
                 // Don't show technical error messages, just show user-friendly message
                 Toast.makeText(requireContext(), "Unable to load queue history. Please try again.", Toast.LENGTH_SHORT).show()
             }
+    }
+    
+    private fun filterQueuesByDepartment() {
+        queueList.clear()
+        
+        for (appointment in allQueueList) {
+            // Extract department from queue number (format: YYYY-MM-DD-DEPT-XXX)
+            val department = if (appointment.queueNumber.isNotEmpty()) {
+                val parts = appointment.queueNumber.split("-")
+                if (parts.size >= 4) {
+                    when (parts[3]) {
+                        "FIN" -> "Finance"
+                        "REG" -> "Registrar"
+                        else -> parts[3]
+                    }
+                } else {
+                    "Unknown"
+                }
+            } else {
+                "Unknown"
+            }
+            
+            // Add to filtered list if department matches
+            if (department == selectedDepartment) {
+                queueList.add(appointment)
+            }
+        }
+        
+        queueAdapter.notifyDataSetChanged()
+        
+        if (queueList.isEmpty()) {
+            showEmptyView(true)
+        } else {
+            showEmptyView(false)
+        }
     }
 
 

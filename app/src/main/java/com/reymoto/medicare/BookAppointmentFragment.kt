@@ -289,11 +289,11 @@ class BookAppointmentFragment : Fragment() {
             "Gcash" -> {
                 addFieldLabel(layout, "Gcash Name")
                 addEditTextField(layout, "etGcashName", "Sunshine")
-                addFieldLabel(layout, "Amount")
+                addFieldLabel(layout, "Paid Amount")
                 addEditTextField(layout, "etGcashAmount", "5000")
             }
             "Cash" -> {
-                addFieldLabel(layout, "Amount")
+                addFieldLabel(layout, "Paid Amount")
                 addEditTextField(layout, "etCashAmount", "5000")
             }
             "Card" -> {
@@ -301,7 +301,7 @@ class BookAppointmentFragment : Fragment() {
                 addEditTextField(layout, "etCardHolderName", "Card Holder Name")
                 addFieldLabel(layout, "Bank")
                 addEditTextField(layout, "etBank", "Bank Name")
-                addFieldLabel(layout, "Amount")
+                addFieldLabel(layout, "Paid Amount")
                 addEditTextField(layout, "etCardAmount", "5000")
             }
             "Cheque" -> {
@@ -309,7 +309,7 @@ class BookAppointmentFragment : Fragment() {
                 addEditTextField(layout, "etChequeNo", "Cheque Number")
                 addFieldLabel(layout, "Bank")
                 addEditTextField(layout, "etBank", "Bank Name")
-                addFieldLabel(layout, "Amount")
+                addFieldLabel(layout, "Paid Amount")
                 addEditTextField(layout, "etChequeAmount", "5000")
             }
         }

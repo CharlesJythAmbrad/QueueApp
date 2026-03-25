@@ -261,37 +261,86 @@ class AdminDashboardFragment : Fragment() {
     }
 
     private fun setupRealtimeListeners() {
+        // Get today's date for filtering
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+        val today = dateFormat.format(Date())
+        
+        // Finance pending count - only today's queues
         financeListener = db.collection("appointments")
             .whereEqualTo("department", "Finance")
             .whereEqualTo("status", "Pending")
             .addSnapshotListener { snapshots, error ->
-                if (error != null) return@addSnapshotListener
-                tvFinancePending.text = (snapshots?.size() ?: 0).toString()
+                if (error != null) {
+                    android.util.Log.e("AdminDashboard", "Error listening to Finance pending: ${error.message}")
+                    return@addSnapshotListener
+                }
+                
+                // Filter to only today's queues
+                val todayPendingCount = snapshots?.documents?.count { doc ->
+                    val queueNumber = doc.getString("queueNumber") ?: ""
+                    queueNumber.startsWith(today)
+                } ?: 0
+                
+                tvFinancePending.text = todayPendingCount.toString()
+                android.util.Log.d("AdminDashboard", "Finance pending today: $todayPendingCount")
             }
 
+        // Registrar pending count - only today's queues
         registrarListener = db.collection("appointments")
             .whereEqualTo("department", "Registrar")
             .whereEqualTo("status", "Pending")
             .addSnapshotListener { snapshots, error ->
-                if (error != null) return@addSnapshotListener
-                tvRegistrarPending.text = (snapshots?.size() ?: 0).toString()
+                if (error != null) {
+                    android.util.Log.e("AdminDashboard", "Error listening to Registrar pending: ${error.message}")
+                    return@addSnapshotListener
+                }
+                
+                // Filter to only today's queues
+                val todayPendingCount = snapshots?.documents?.count { doc ->
+                    val queueNumber = doc.getString("queueNumber") ?: ""
+                    queueNumber.startsWith(today)
+                } ?: 0
+                
+                tvRegistrarPending.text = todayPendingCount.toString()
+                android.util.Log.d("AdminDashboard", "Registrar pending today: $todayPendingCount")
             }
     }
 
     private fun callNextQueue(department: String) {
-        // Get next pending queue (try without orderBy first to avoid index issues)
+        // Get today's date for filtering
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+        val today = dateFormat.format(Date())
+        
+        // Get next pending queue from today only
         db.collection("appointments")
             .whereEqualTo("department", department)
             .whereEqualTo("status", "Pending")
-            .limit(1)
             .get()
             .addOnSuccessListener { pendingDocs ->
-                if (pendingDocs.isEmpty) {
+                // Filter to only today's queues
+                val todayPendingDocs = pendingDocs.documents.filter { doc ->
+                    val queueNumber = doc.getString("queueNumber") ?: ""
+                    queueNumber.startsWith(today)
+                }
+                
+                if (todayPendingDocs.isEmpty()) {
                     Toast.makeText(context, "No request queue yet for $department department", Toast.LENGTH_LONG).show()
                     return@addOnSuccessListener
                 }
 
-                val doc = pendingDocs.documents[0]
+                // Get the oldest pending queue from today (first in queue)
+                val doc = todayPendingDocs.minByOrNull { 
+                    val queueNumber = it.getString("queueNumber") ?: ""
+                    // Extract queue number for sorting (e.g., "001" from "2026-03-23-FIN-001")
+                    val parts = queueNumber.split("-")
+                    if (parts.size >= 5) parts[4].toIntOrNull() ?: 999 else 999
+                }
+                
+                if (doc == null) {
+                    Toast.makeText(context, "No request queue yet for $department department", Toast.LENGTH_LONG).show()
+                    return@addOnSuccessListener
+                }
+                
                 val queueNumber = doc.getString("queueNumber") ?: ""
                 
                 // Increment counter first

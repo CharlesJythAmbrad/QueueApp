@@ -142,23 +142,23 @@
             <Button
                 android:id="@+id/btnBack"
                 android:layout_width="0dp"
-                android:layout_height="56dp"
+                android:layout_height="46dp"
                 android:layout_weight="1"
                 android:text="← Back"
                 android:textSize="16sp"
                 android:layout_marginEnd="8dp"
-                android:background="#E0E0E0"/>
+                android:background="@drawable/button_primary"/>
 
             <Button
                 android:id="@+id/btnNext"
                 android:layout_width="0dp"
-                android:layout_height="56dp"
+                android:layout_height="46dp"
                 android:layout_weight="1"
                 android:text="Next →"
                 android:textSize="16sp"
                 android:textColor="@android:color/white"
                 android:layout_marginStart="8dp"
-                android:background="#4CAF50"/>
+                android:background="@drawable/button_primary"/>
         </LinearLayout>
 
     </LinearLayout>
