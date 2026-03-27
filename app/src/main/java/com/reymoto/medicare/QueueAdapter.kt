@@ -31,13 +31,37 @@ class QueueAdapter(
         
         holder.queueNumberTextView.text = appointment.queueNumber
         holder.transactionTypeTextView.text = appointment.transactionType
-        holder.dateTextView.text = appointment.appointmentDate
+        
+        // Hide date for registrar items, show for finance items
+        val department = if (appointment.queueNumber.isNotEmpty()) {
+            val parts = appointment.queueNumber.split("-")
+            if (parts.size >= 4) {
+                when (parts[3]) {
+                    "REG" -> "Registrar"
+                    "FIN" -> "Finance"
+                    else -> "Unknown"
+                }
+            } else {
+                "Unknown"
+            }
+        } else {
+            "Unknown"
+        }
+        
+        if (department == "Registrar") {
+            holder.dateTextView.visibility = View.GONE
+        } else {
+            holder.dateTextView.visibility = View.VISIBLE
+            holder.dateTextView.text = appointment.appointmentDate
+        }
+        
         holder.statusTextView.text = appointment.status
         
         // Set status badge color
         val statusColor = when (appointment.status) {
             "Pending" -> android.R.color.holo_orange_dark
             "Serving" -> android.R.color.holo_blue_dark
+            "Served" -> android.R.color.holo_blue_dark
             "Completed" -> android.R.color.holo_green_dark
             "Cancelled" -> android.R.color.holo_red_dark
             else -> android.R.color.darker_gray

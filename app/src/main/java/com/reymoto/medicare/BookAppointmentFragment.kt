@@ -285,6 +285,8 @@ class BookAppointmentFragment : Fragment() {
         layout.removeAllViews()
         paymentFieldsData.clear()
 
+
+
         when (paymentMethod) {
             "Gcash" -> {
                 addFieldLabel(layout, "Gcash Name")
@@ -314,6 +316,9 @@ class BookAppointmentFragment : Fragment() {
             }
         }
     }
+    private fun dpToPx(dp: Int): Int {
+        return (dp * resources.displayMetrics.density).toInt()
+    }
 
     private fun addFieldLabel(layout: LinearLayout, labelText: String) {
         val label = TextView(requireContext())
@@ -339,14 +344,15 @@ class BookAppointmentFragment : Fragment() {
         editText.setBackgroundResource(android.R.drawable.edit_text)
         editText.setTextColor(resources.getColor(android.R.color.black, null))
         editText.setHintTextColor(resources.getColor(android.R.color.darker_gray, null))
-        
+
         val params = LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.MATCH_PARENT,
-            150 // 50dp height
+            dpToPx(50) // ✅ FIXED: now using 50dp instead of raw pixels
         )
-        params.setMargins(0, 0, 0, 32)
+        params.setMargins(0, 0, 0, dpToPx(16)) // better spacing
+
         editText.layoutParams = params
-        
+
         layout.addView(editText)
     }
 

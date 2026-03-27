@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
@@ -97,38 +98,234 @@ class ProfileFragment : Fragment(), NotificationManager.NotificationListener {
     }
 
     private fun showChangePasswordDialog() {
-        val dialogView = LayoutInflater.from(requireContext()).inflate(android.R.layout.simple_list_item_1, null)
-        
         // Create custom dialog layout
         val dialogLayout = LinearLayout(requireContext()).apply {
             orientation = LinearLayout.VERTICAL
-            setPadding(50, 50, 50, 50)
+            setPadding(0, 0, 0, 0) // Remove padding, will add to sections
         }
 
+        // Add header with title and close button
+        val headerLayout = android.widget.RelativeLayout(requireContext()).apply {
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+            setPadding(50, 50, 50, 30)
+            background = android.graphics.drawable.GradientDrawable().apply {
+                setColor(android.graphics.Color.parseColor("#FFFFFF"))
+            }
+        }
+
+        val titleText = TextView(requireContext()).apply {
+            text = "Change Password"
+            textSize = 18f
+            setTextColor(android.graphics.Color.BLACK)
+            setTypeface(null, android.graphics.Typeface.BOLD)
+            layoutParams = android.widget.RelativeLayout.LayoutParams(
+                android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT,
+                android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT
+            ).apply {
+                addRule(android.widget.RelativeLayout.CENTER_IN_PARENT)
+
+            }
+        }
+
+
+
+        headerLayout.addView(titleText)
+
+
+        // Content layout with padding
+        val contentLayout = LinearLayout(requireContext()).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(50, 30, 50, 20)
+        }
+
+        // Current Password Section
+        val currentPasswordLabel = TextView(requireContext()).apply {
+            text = "Current Password"
+            textSize = 14f
+            setTextColor(android.graphics.Color.BLACK)
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply {
+                setMargins(0, 0, 0, 8)
+            }
+        }
+        
         val currentPasswordEdit = EditText(requireContext()).apply {
-            hint = "Current Password"
+            hint = "Enter current password"
             inputType = android.text.InputType.TYPE_CLASS_TEXT or android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD
-            setPadding(20, 20, 20, 20)
+            setPadding(20, 0, 70, 0) // Extra right padding for bigger eye icon
+            textSize = 16f
+            height = (50 * resources.displayMetrics.density).toInt() // Exactly 50dp
+            background = android.graphics.drawable.GradientDrawable().apply {
+                setStroke(2, android.graphics.Color.GRAY)
+                cornerRadius = 8f
+            }
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply {
+                setMargins(0, 0, 0, 20)
+            }
         }
+        
+        // Create relative layout to position eye icon inside the EditText
+        val currentPasswordContainer = android.widget.RelativeLayout(requireContext()).apply {
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply {
+                setMargins(0, 0, 0, 20)
+            }
+        }
+        
+        val currentPasswordToggle = ImageView(requireContext()).apply {
+            setImageResource(R.drawable.ic_eye_off)
+            setPadding(8, 8, 8, 8)
+            layoutParams = android.widget.RelativeLayout.LayoutParams(60, 60).apply { // Bigger icon
+                addRule(android.widget.RelativeLayout.ALIGN_PARENT_END)
+                addRule(android.widget.RelativeLayout.CENTER_VERTICAL)
+                setMargins(0, 0, 10, 0)
+            }
+            scaleType = ImageView.ScaleType.CENTER_INSIDE
+            background = android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT)
+            setOnClickListener {
+                togglePasswordVisibility(currentPasswordEdit, this)
+            }
+        }
+        
+        currentPasswordEdit.layoutParams = android.widget.RelativeLayout.LayoutParams(
+            android.widget.RelativeLayout.LayoutParams.MATCH_PARENT,
+            (50 * resources.displayMetrics.density).toInt()
+        )
+        
+        currentPasswordContainer.addView(currentPasswordEdit)
+        currentPasswordContainer.addView(currentPasswordToggle)
 
+        // New Password Section
+        val newPasswordLabel = TextView(requireContext()).apply {
+            text = "New Password"
+            textSize = 14f
+            setTextColor(android.graphics.Color.BLACK)
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply {
+                setMargins(0, 0, 0, 8)
+            }
+        }
+        
+        val newPasswordContainer = android.widget.RelativeLayout(requireContext()).apply {
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply {
+                setMargins(0, 0, 0, 20)
+            }
+        }
+        
         val newPasswordEdit = EditText(requireContext()).apply {
-            hint = "New Password"
+            hint = "Enter new password"
             inputType = android.text.InputType.TYPE_CLASS_TEXT or android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD
-            setPadding(20, 20, 20, 20)
+            setPadding(20, 0, 70, 0) // Extra right padding for bigger eye icon
+            textSize = 16f
+            background = android.graphics.drawable.GradientDrawable().apply {
+                setStroke(2, android.graphics.Color.GRAY)
+                cornerRadius = 8f
+            }
+            layoutParams = android.widget.RelativeLayout.LayoutParams(
+                android.widget.RelativeLayout.LayoutParams.MATCH_PARENT,
+                (50 * resources.displayMetrics.density).toInt()
+            )
         }
+        
+        val newPasswordToggle = ImageView(requireContext()).apply {
+            setImageResource(R.drawable.ic_eye_off)
+            setPadding(8, 8, 8, 8)
+            layoutParams = android.widget.RelativeLayout.LayoutParams(60, 60).apply { // Bigger icon
+                addRule(android.widget.RelativeLayout.ALIGN_PARENT_END)
+                addRule(android.widget.RelativeLayout.CENTER_VERTICAL)
+                setMargins(0, 0, 10, 0)
+            }
+            scaleType = ImageView.ScaleType.CENTER_INSIDE
+            background = android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT)
+            setOnClickListener {
+                togglePasswordVisibility(newPasswordEdit, this)
+            }
+        }
+        
+        newPasswordContainer.addView(newPasswordEdit)
+        newPasswordContainer.addView(newPasswordToggle)
 
+        // Confirm Password Section
+        val confirmPasswordLabel = TextView(requireContext()).apply {
+            text = "Confirm New Password"
+            textSize = 14f
+            setTextColor(android.graphics.Color.BLACK)
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply {
+                setMargins(0, 0, 0, 8)
+            }
+        }
+        
+        val confirmPasswordContainer = android.widget.RelativeLayout(requireContext()).apply {
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+        }
+        
         val confirmPasswordEdit = EditText(requireContext()).apply {
-            hint = "Confirm New Password"
+            hint = "Confirm new password"
             inputType = android.text.InputType.TYPE_CLASS_TEXT or android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD
-            setPadding(20, 20, 20, 20)
+            setPadding(20, 0, 70, 0) // Extra right padding for bigger eye icon
+            textSize = 16f
+            background = android.graphics.drawable.GradientDrawable().apply {
+                setStroke(2, android.graphics.Color.GRAY)
+                cornerRadius = 8f
+            }
+            layoutParams = android.widget.RelativeLayout.LayoutParams(
+                android.widget.RelativeLayout.LayoutParams.MATCH_PARENT,
+                (50 * resources.displayMetrics.density).toInt()
+            )
         }
+        
+        val confirmPasswordToggle = ImageView(requireContext()).apply {
+            setImageResource(R.drawable.ic_eye_off)
+            setPadding(8, 8, 8, 8)
+            layoutParams = android.widget.RelativeLayout.LayoutParams(60, 60).apply { // Bigger icon
+                addRule(android.widget.RelativeLayout.ALIGN_PARENT_END)
+                addRule(android.widget.RelativeLayout.CENTER_VERTICAL)
+                setMargins(0, 0, 10, 0)
+            }
+            scaleType = ImageView.ScaleType.CENTER_INSIDE
+            background = android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT)
+            setOnClickListener {
+                togglePasswordVisibility(confirmPasswordEdit, this)
+            }
+        }
+        
+        confirmPasswordContainer.addView(confirmPasswordEdit)
+        confirmPasswordContainer.addView(confirmPasswordToggle)
 
-        dialogLayout.addView(currentPasswordEdit)
-        dialogLayout.addView(newPasswordEdit)
-        dialogLayout.addView(confirmPasswordEdit)
+        // Add all content components to content layout
+        contentLayout.addView(currentPasswordLabel)
+        contentLayout.addView(currentPasswordContainer)
+        contentLayout.addView(newPasswordLabel)
+        contentLayout.addView(newPasswordContainer)
+        contentLayout.addView(confirmPasswordLabel)
+        contentLayout.addView(confirmPasswordContainer)
 
-        AlertDialog.Builder(requireContext())
-            .setTitle("Change Password")
+        // Add header and content to main dialog layout
+        dialogLayout.addView(headerLayout)
+        dialogLayout.addView(contentLayout)
+
+        val dialog = AlertDialog.Builder(requireContext())
             .setView(dialogLayout)
             .setPositiveButton("Change") { _, _ ->
                 val currentPassword = currentPasswordEdit.text.toString()
@@ -153,7 +350,25 @@ class ProfileFragment : Fragment(), NotificationManager.NotificationListener {
                 changePassword(currentPassword, newPassword)
             }
             .setNegativeButton("Cancel", null)
-            .show()
+            .create()
+
+
+
+        dialog.show()
+    }
+    
+    private fun togglePasswordVisibility(editText: EditText, imageView: ImageView) {
+        if (editText.inputType == (android.text.InputType.TYPE_CLASS_TEXT or android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD)) {
+            // Show password
+            editText.inputType = android.text.InputType.TYPE_CLASS_TEXT or android.text.InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
+            imageView.setImageResource(R.drawable.ic_eye)
+        } else {
+            // Hide password
+            editText.inputType = android.text.InputType.TYPE_CLASS_TEXT or android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD
+            imageView.setImageResource(R.drawable.ic_eye_off)
+        }
+        // Move cursor to end
+        editText.setSelection(editText.text.length)
     }
 
     private fun changePassword(currentPassword: String, newPassword: String) {

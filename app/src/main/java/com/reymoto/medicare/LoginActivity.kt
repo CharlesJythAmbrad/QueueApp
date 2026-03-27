@@ -141,7 +141,7 @@ class LoginActivity : AppCompatActivity() {
     private fun showForgotPasswordDialog() {
         val dialogView = layoutInflater.inflate(android.R.layout.simple_list_item_1, null)
         val editText = EditText(this).apply {
-            hint = "Enter your ID Number (05-2425-000000)"
+            hint = "Enter your ID Number"
             setPadding(50, 40, 50, 40)
         }
 

@@ -4,7 +4,7 @@
     <item android:state_pressed="true">
         <shape android:shape="rectangle">
             <solid android:color="#1565C0"/>
-            <corners android:radius="12dp"/>
+            <corners android:radius="50dp"/>
         </shape>
     </item>
 
@@ -12,7 +12,7 @@
     <item android:state_focused="true">
         <shape android:shape="rectangle">
             <solid android:color="#1976D2"/>
-            <corners android:radius="12dp"/>
+            <corners android:radius="50dp"/>
             <stroke
                 android:width="2dp"
                 android:color="#0D47A1"/>
@@ -23,7 +23,7 @@
     <item>
         <shape android:shape="rectangle">
             <solid android:color="#1976D2"/>
-            <corners android:radius="12dp"/>
+            <corners android:radius="50dp"/>
         </shape>
     </item>
 
