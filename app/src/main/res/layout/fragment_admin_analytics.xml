@@ -47,7 +47,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="48dp"
                     android:background="@android:drawable/btn_dropdown"
-                    android:padding="12dp" />
+                    android:padding="12dp"
+                    android:textColor="#000000"
+                    android:textSize="14sp" />
 
             </LinearLayout>
         </androidx.cardview.widget.CardView>
@@ -84,16 +86,22 @@
                         android:id="@+id/spinnerPeriodType"
                         android:layout_width="0dp"
                         android:layout_height="48dp"
-                        android:layout_weight="1"
+                        android:layout_weight="1.2"
                         android:layout_marginEnd="8dp"
-                        android:background="@android:drawable/btn_dropdown" />
+                        android:background="@android:drawable/btn_dropdown"
+                        android:padding="12dp"
+                        android:textColor="#000000"
+                        android:textSize="14sp" />
 
                     <Spinner
                         android:id="@+id/spinnerDateValue"
                         android:layout_width="0dp"
                         android:layout_height="48dp"
-                        android:layout_weight="2"
-                        android:background="@android:drawable/btn_dropdown" />
+                        android:layout_weight="1.8"
+                        android:background="@android:drawable/btn_dropdown"
+                        android:padding="12dp"
+                        android:textColor="#000000"
+                        android:textSize="14sp" />
 
                 </LinearLayout>
 
@@ -167,11 +175,13 @@
 
                 <!-- Status Grid -->
                 <LinearLayout
-                    android:layout_width="342dp"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="12dp"
-                    android:orientation="horizontal">
+                    android:orientation="horizontal"
+                    android:weightSum="2">
 
+                    <!-- Total Card -->
                     <androidx.cardview.widget.CardView
                         android:layout_width="0dp"
                         android:layout_height="120dp"
@@ -207,48 +217,13 @@
                         </LinearLayout>
                     </androidx.cardview.widget.CardView>
 
-                    <androidx.cardview.widget.CardView
-                        android:layout_width="0dp"
-                        android:layout_height="120dp"
-                        android:layout_marginStart="6dp"
-                        android:layout_marginEnd="6dp"
-                        android:layout_weight="1"
-                        app:cardBackgroundColor="#E8F5E9"
-                        app:cardCornerRadius="8dp"
-                        app:cardElevation="2dp">
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:gravity="center"
-                            android:orientation="vertical"
-                            android:padding="16dp">
-
-                            <TextView
-                                android:layout_width="75dp"
-                                android:layout_height="wrap_content"
-                                android:layout_marginBottom="8dp"
-                                android:text="Done"
-                                android:textSize="14sp"
-                                android:textStyle="bold" />
-
-                            <TextView
-                                android:id="@+id/tvDepartmentCompleted"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="0"
-                                android:textColor="#4CAF50"
-                                android:textSize="28sp"
-                                android:textStyle="bold" />
-                        </LinearLayout>
-                    </androidx.cardview.widget.CardView>
-
+                    <!-- Completed Card -->
                     <androidx.cardview.widget.CardView
                         android:layout_width="0dp"
                         android:layout_height="120dp"
                         android:layout_marginStart="6dp"
                         android:layout_weight="1"
-                        app:cardBackgroundColor="#FFF3E0"
+                        app:cardBackgroundColor="#E7FFE0"
                         app:cardCornerRadius="8dp"
                         app:cardElevation="2dp">
 
@@ -263,7 +238,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginBottom="8dp"
-                                android:text="Pending"
+                                android:text="Completed"
                                 android:textSize="14sp"
                                 android:textStyle="bold" />
 
@@ -272,7 +247,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="0"
-                                android:textColor="#FF9800"
+                                android:textColor="#1AFF00"
                                 android:textSize="28sp"
                                 android:textStyle="bold" />
                         </LinearLayout>

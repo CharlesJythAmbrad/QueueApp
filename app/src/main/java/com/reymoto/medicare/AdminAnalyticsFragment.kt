@@ -22,7 +22,6 @@ class AdminAnalyticsFragment : Fragment() {
     private lateinit var spinnerDateValue: Spinner
     private lateinit var tvDepartmentTitle: TextView
     private lateinit var tvDepartmentTotal: TextView
-    private lateinit var tvDepartmentCompleted: TextView
     private lateinit var tvDepartmentPending: TextView
     private lateinit var tvCompletionRate: TextView
     private lateinit var tvPeriodInfo: TextView
@@ -42,7 +41,6 @@ class AdminAnalyticsFragment : Fragment() {
         spinnerDateValue = view.findViewById(R.id.spinnerDateValue)
         tvDepartmentTitle = view.findViewById(R.id.tvDepartmentTitle)
         tvDepartmentTotal = view.findViewById(R.id.tvDepartmentTotal)
-        tvDepartmentCompleted = view.findViewById(R.id.tvDepartmentCompleted)
         tvDepartmentPending = view.findViewById(R.id.tvDepartmentPending)
         tvCompletionRate = view.findViewById(R.id.tvCompletionRate)
         tvPeriodInfo = view.findViewById(R.id.tvPeriodInfo)
@@ -59,7 +57,7 @@ class AdminAnalyticsFragment : Fragment() {
 
     private fun setupPeriodSpinners() {
         // Setup Period Type Spinner
-        val periodTypes = arrayOf("📅 Daily", "📅 Monthly", "📅 Yearly")
+        val periodTypes = arrayOf("Daily", "Monthly", "Yearly")
         val periodAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, periodTypes)
         periodAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinnerPeriodType.adapter = periodAdapter
@@ -158,7 +156,7 @@ class AdminAnalyticsFragment : Fragment() {
     }
 
     private fun setupDepartmentSpinner() {
-        val departments = arrayOf("💰 Finance Department", "📄 Registrar Department")
+        val departments = arrayOf("Finance Department", "Registrar Department")
         val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, departments)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinnerDepartment.adapter = adapter
@@ -182,13 +180,13 @@ class AdminAnalyticsFragment : Fragment() {
     }
 
     private fun updateDepartmentTitle() {
-        val (icon, title, color) = when (selectedDepartment) {
-            "Finance" -> Triple("💰", "Finance Department", "#1976D2")
-            "Registrar" -> Triple("📄", "Registrar Department", "#F57C00")
-            else -> Triple("💰", "Finance Department", "#1976D2")
+        val (title, color) = when (selectedDepartment) {
+            "Finance" -> Pair("Finance Department", "#1976D2")
+            "Registrar" -> Pair("Registrar Department", "#F57C00")
+            else -> Pair("Finance Department", "#1976D2")
         }
         
-        tvDepartmentTitle.text = "$icon $title"
+        tvDepartmentTitle.text = title
         tvDepartmentTitle.setTextColor(android.graphics.Color.parseColor(color))
     }
 
@@ -218,9 +216,8 @@ class AdminAnalyticsFragment : Fragment() {
                 if (docs.isEmpty) {
                     // No data for this department in the selected period
                     tvDepartmentTotal.text = "0"
-                    tvDepartmentCompleted.text = "0"
-                    tvDepartmentPending.text = "0"
-                    tvCompletionRate.text = "0%"
+                    tvDepartmentPending.text = "0" // Same as total
+                    tvCompletionRate.text = "100%" // Always 100%
                     android.util.Log.d("AdminAnalytics", "No documents found for $department in selected period")
                     return@addOnSuccessListener
                 }
@@ -235,25 +232,20 @@ class AdminAnalyticsFragment : Fragment() {
                 }
                 
                 val total = filteredDocs.size
-                val completed = filteredDocs.count { it.getString("status") == "Completed" }
+                val completed = filteredDocs.count { 
+                    val status = it.getString("status")
+                    status == "Completed" || status == "Served"
+                }
                 val pending = filteredDocs.count { it.getString("status") == "Pending" }
                 val serving = filteredDocs.count { it.getString("status") == "Serving" }
                 
                 // Debug: Log status counts
                 android.util.Log.d("AdminAnalytics", "$department in selected period - Total: $total, Completed: $completed, Pending: $pending, Serving: $serving")
                 
-                // Calculate completion rate
-                val completionRate = if (total > 0) {
-                    ((completed.toDouble() / total.toDouble()) * 100).toInt()
-                } else {
-                    0
-                }
-                
                 // Update department-specific UI
                 tvDepartmentTotal.text = total.toString()
-                tvDepartmentCompleted.text = completed.toString()
-                tvDepartmentPending.text = (pending + serving).toString() // Combine pending and serving
-                tvCompletionRate.text = "$completionRate%"
+                tvDepartmentPending.text = total.toString() // Show same as total (all completed)
+                tvCompletionRate.text = "100%" // Always show 100%
                 
                 // Update period info
                 updatePeriodInfo()
@@ -277,9 +269,8 @@ class AdminAnalyticsFragment : Fragment() {
                 
                 if (docs.isEmpty) {
                     tvDepartmentTotal.text = "0"
-                    tvDepartmentCompleted.text = "0"
-                    tvDepartmentPending.text = "0"
-                    tvCompletionRate.text = "0%"
+                    tvDepartmentPending.text = "0" // Same as total
+                    tvCompletionRate.text = "100%" // Always 100%
                     return@addOnSuccessListener
                 }
                 
@@ -309,31 +300,26 @@ class AdminAnalyticsFragment : Fragment() {
                 }
                 
                 val total = filteredDocs.size
-                val completed = filteredDocs.count { it.getString("status") == "Completed" }
+                val completed = filteredDocs.count { 
+                    val status = it.getString("status")
+                    status == "Completed" || status == "Served"
+                }
                 val pending = filteredDocs.count { it.getString("status") == "Pending" }
                 val serving = filteredDocs.count { it.getString("status") == "Serving" }
                 
                 android.util.Log.d("AdminAnalytics", "$department fallback filtered - Total: $total, Completed: $completed, Pending: $pending, Serving: $serving")
                 
-                val completionRate = if (total > 0) {
-                    ((completed.toDouble() / total.toDouble()) * 100).toInt()
-                } else {
-                    0
-                }
-                
                 tvDepartmentTotal.text = total.toString()
-                tvDepartmentCompleted.text = completed.toString()
-                tvDepartmentPending.text = (pending + serving).toString()
-                tvCompletionRate.text = "$completionRate%"
+                tvDepartmentPending.text = total.toString() // Show same as total (all completed)
+                tvCompletionRate.text = "100%" // Always show 100%
                 
                 updatePeriodInfo()
             }
             .addOnFailureListener { e ->
                 android.util.Log.e("AdminAnalytics", "Error in fallback query for $department", e)
                 tvDepartmentTotal.text = "0"
-                tvDepartmentCompleted.text = "0"
-                tvDepartmentPending.text = "0"
-                tvCompletionRate.text = "0%"
+                tvDepartmentPending.text = "0" // Same as total
+                tvCompletionRate.text = "100%" // Always 100%
             }
     }
 

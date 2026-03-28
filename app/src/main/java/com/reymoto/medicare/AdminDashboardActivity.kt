@@ -53,28 +53,17 @@ class AdminDashboardActivity : AppCompatActivity() {
         val popupMenu = PopupMenu(this, anchor)
         
         // Add menu items
-        popupMenu.menu.add(0, 1, 0, "🔄 Refresh Dashboard")
-        popupMenu.menu.add(0, 2, 0, "📊 View All Queues")
-        popupMenu.menu.add(0, 3, 0, "🗑️ Clear Completed Queues")
+
+
         popupMenu.menu.add(0, 4, 0, "⚙️ Admin Settings")
         popupMenu.menu.add(0, 5, 0, "📱 System Info")
-        popupMenu.menu.add(0, 7, 0, "🔄 Reset Counters (Test)")
+        popupMenu.menu.add(0, 7, 0, "📊 Limit Queue")
         popupMenu.menu.add(0, 6, 0, "🚪 Logout")
         
         popupMenu.setOnMenuItemClickListener { menuItem ->
             when (menuItem.itemId) {
-                1 -> {
-                    refreshDashboard()
-                    true
-                }
-                2 -> {
-                    showAllQueuesDialog()
-                    true
-                }
-                3 -> {
-                    showClearCompletedDialog()
-                    true
-                }
+
+
                 4 -> {
                     showAdminSettings()
                     true
@@ -84,7 +73,7 @@ class AdminDashboardActivity : AppCompatActivity() {
                     true
                 }
                 7 -> {
-                    showResetCountersDialog()
+                    showLimitQueueDialog()
                     true
                 }
                 6 -> {
@@ -98,49 +87,16 @@ class AdminDashboardActivity : AppCompatActivity() {
         popupMenu.show()
     }
 
-    private fun refreshDashboard() {
-        // Refresh current fragment
-        val currentFragment = supportFragmentManager.findFragmentById(R.id.adminFragmentContainer)
-        if (currentFragment != null) {
-            supportFragmentManager.beginTransaction()
-                .detach(currentFragment)
-                .attach(currentFragment)
-                .commit()
-        }
-        Toast.makeText(this, "Dashboard refreshed", Toast.LENGTH_SHORT).show()
-    }
 
-    private fun showAllQueuesDialog() {
-        AlertDialog.Builder(this)
-            .setTitle("📊 All Queues Overview")
-            .setMessage("Queue Status Summary:\n\n• Finance: Active queue management\n• Registrar: Document processing\n• Real-time updates enabled\n• Location validation active\n\nSwitch to Analytics tab for detailed statistics.")
-            .setPositiveButton("View Analytics") { _, _ ->
-                findViewById<BottomNavigationView>(R.id.adminBottomNavigation).selectedItemId = R.id.nav_admin_analytics
-            }
-            .setNegativeButton("OK", null)
-            .show()
-    }
 
-    private fun showClearCompletedDialog() {
-        AlertDialog.Builder(this)
-            .setTitle("⚠️ Clear Completed Queues")
-            .setMessage("This will permanently delete all completed queue records from the database.\n\nThis action cannot be undone. Continue?")
-            .setPositiveButton("Clear") { _, _ ->
-                clearCompletedQueues()
-            }
-            .setNegativeButton("Cancel", null)
-            .show()
-    }
 
-    private fun clearCompletedQueues() {
-        // TODO: Implement clearing completed queues from Firestore
-        Toast.makeText(this, "Completed queues cleared successfully", Toast.LENGTH_SHORT).show()
-    }
+
+
 
     private fun showAdminSettings() {
         AlertDialog.Builder(this)
             .setTitle("⚙️ Admin Settings")
-            .setMessage("Current Configuration:\n\n• Auto-reset: Daily at midnight\n• Queue timeout: 30 minutes\n• Location radius: 2km from campus\n• Max daily queues: Unlimited\n• Backup frequency: Daily\n\nContact system administrator for changes.")
+            .setMessage("Current Configuration:\n\n• Auto-reset: Daily at midnight\n• Location radius: within campus\n• Max daily queues: 1500\n\nContact system administrator for changes.")
             .setPositiveButton("OK", null)
             .show()
     }
@@ -153,37 +109,33 @@ class AdminDashboardActivity : AppCompatActivity() {
             .show()
     }
     
-    private fun showResetCountersDialog() {
+    private fun showLimitQueueDialog() {
         AlertDialog.Builder(this)
-            .setTitle("⚠️ Reset Counters")
-            .setMessage("This will reset the 'Now Serving' counters back to 0 for both Finance and Registrar departments.\n\nThis is intended for testing purposes. Use with caution.\n\nContinue?")
-            .setPositiveButton("Reset") { _, _ ->
-                resetCountersManually()
-            }
-            .setNegativeButton("Cancel", null)
+            .setTitle("📊 Queue Limit Settings")
+            .setMessage("Daily Queue Limit Configuration:\n\n• Maximum queues per day: 1500\n• Limit helps manage server load\n• Resets automatically at midnight\n\nNote: This is a system configuration setting.")
+            .setPositiveButton("OK", null)
             .show()
-    }
-    
-    private fun resetCountersManually() {
-        // Get the current fragment and call the reset method if it's AdminDashboardFragment
-        val currentFragment = supportFragmentManager.findFragmentById(R.id.adminFragmentContainer)
-        if (currentFragment is AdminDashboardFragment) {
-            currentFragment.forceResetCounters()
-            Toast.makeText(this, "Counters reset to 0", Toast.LENGTH_SHORT).show()
-        } else {
-            Toast.makeText(this, "Please go to Dashboard tab to reset counters", Toast.LENGTH_SHORT).show()
-        }
     }
 
+
     private fun showLogoutConfirmation() {
-        AlertDialog.Builder(this)
+        val dialog = AlertDialog.Builder(this)
             .setTitle("🚪 Logout")
             .setMessage("Are you sure you want to logout from the admin panel?")
-            .setPositiveButton("Logout") { _, _ ->
-                performLogout()
-            }
+            .setPositiveButton("Logout", null)
             .setNegativeButton("Cancel", null)
-            .show()
+            .create()
+            
+        dialog.setOnShowListener {
+            // Make the logout button text red
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE)?.setTextColor(android.graphics.Color.RED)
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE)?.setOnClickListener {
+                performLogout()
+                dialog.dismiss()
+            }
+        }
+        
+        dialog.show()
     }
 
     private fun performLogout() {
